@@ -1,0 +1,99 @@
+@startuml
+
+namespace StealthBoardStrategy{
+    package Front{
+        package {
+
+        }
+        package UI{
+
+        }
+        package Event{
+
+        }
+    }
+    package Server{
+        package GameLogic{
+            class BattleManager{
+                -int TurnProcessed
+                -float RemaingTime
+                +BattleLoop()
+                +PreProcess()
+                +MainProcess()
+                +EndProcess()
+                +TurnEnd()
+            }
+        }
+        package DataBase{
+            abstract Unit{
+                -[int, bool] Id
+                -[string, bool] Name
+                -[int, bool] Position
+                -bool IsActive
+            }
+            class Hunter{
+                -[int, int, bool] Hp
+                -[int, int, bool] Regen                
+                -[int, int, bool] Mana
+                -[int, int, bool] ManaRegen
+                -[int, int, bool] Stealth
+                -[int, int, bool] Exposure
+                -[int, int, bool] Atk
+                -[int, int, bool] Mp
+                -[int, int, bool] Def
+                -[int, int, bool] MR
+                -[int, int, bool] Speed
+                -[int, int, bool] Calculation
+                -int ActionPoint
+                -Buff[] buffs
+                +RevealStatus()
+                +AddBuff()
+                +DeleteBuff()
+                +ProcessBuff()
+                +Damage()
+                +TrueDamage()
+                +Move()
+            }
+
+            class Demon{
+
+            }
+
+            class Rune{
+
+            }
+
+            class Building{
+
+            }
+            class Skill{
+                -(int, bool) Id
+                -(string, bool) Name
+                -SkillType SkillType
+                -List<int> args
+                
+            }
+
+            class Buff{
+                -(int, bool) Id
+                -(string, bool) Name           
+            }
+
+            enum UnitType{
+                Hunter, Demon, Rune, 
+            }
+
+            enum SkillType{
+
+            }
+            enum BuffType{
+
+            }
+        }
+        package Event{
+
+        }
+    }
+}
+
+@enduml
