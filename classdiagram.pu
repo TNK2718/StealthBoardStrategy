@@ -2,26 +2,66 @@
 
 namespace StealthBoardStrategy{
     package Front{
-        package {
+        package Client{
+            class Client{
 
+            }
+
+            class ActionMessage{
+
+            }
         }
         package UI{
 
         }
-        package Event{
+        package Events{
 
         }
     }
     package Server{
+        package NetworkManager{
+            class NetworkManager{
+                
+            }
+        }
+        package Event{
+            abstract GameEvent{
+                +EventType EventType
+            }
+            class ActionEvent{
+                +int UnitId
+                +int ActionId
+                +[int, int] TargetPosition
+            }
+            enum EventType{
+                None, Action, TurnEnd, Error
+            }
+        }
         package GameLogic{
             class BattleManager{
                 -int TurnProcessed
                 -float RemaingTime
+                -Players Turn
+                -List<Character> CharacterList
+
                 +BattleLoop()
                 +PreProcess()
                 +MainProcess()
                 +EndProcess()
                 +TurnEnd()
+            }
+
+            class Board{
+                -GroundTile[] tiles
+            }
+
+            class GroundTile{
+                -GroundType GroundType
+                -List<DotEffect> DotEffects
+            }
+
+            enum Players{
+                Player1, Player2
             }
         }
         package DataBase{
@@ -79,8 +119,23 @@ namespace StealthBoardStrategy{
                 -(string, bool) Name           
             }
 
+            class DotEffect{
+                -DotEffectType DotEffectType
+                -int Duration
+                -int CurrentTime
+                -int Power
+            }
+
+            enum DotEffectType{
+                None, Fire
+            }
+
+            enum GroundType{
+                None, Normal, Glassy, Swamp, Rocky
+            }
+
             enum UnitType{
-                Hunter, Demon, Rune, 
+                Hunter, Demon, Rune, Building
             }
 
             enum SkillType{
@@ -89,9 +144,6 @@ namespace StealthBoardStrategy{
             enum BuffType{
 
             }
-        }
-        package Event{
-
         }
     }
 }
