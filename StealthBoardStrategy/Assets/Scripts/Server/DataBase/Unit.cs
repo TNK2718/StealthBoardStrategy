@@ -1,9 +1,12 @@
 using System.Collections.Generic;
+using StealthBoardStrategy.Server.GameLogic;
+using StealthBoardStrategy.Frontend.Client;
 
 namespace StealthBoardStrategy.Server.DataBase{
-    public abstract class Unit {
+    public class Unit {
         public (int value, bool visibility) Id{get;set;}
         protected (string value, bool visibility) Name{get;set;}
+        public Players LocatedSide;
         public (int x, int y, bool visibility) Position{get;set;}
         protected bool IsActive;
         public (int baseVal, int diff, bool visibility) Hp{get;set;}
@@ -25,8 +28,10 @@ namespace StealthBoardStrategy.Server.DataBase{
         public (int baseVal, int diff, bool visibility) Speed{get;set;}
         public (int baseVal, int diff, bool visibility) Calculation{get;set;}
         public int ActionPoint{get;set;}
+        public Players Owner{get; set;}
         public List<Skill> SkillList;
-        public List<Unit> DeamonList;
+        public List<Buff> BuffList;
+        public List<Unit> DemonList;
         public UnitType UnitType;
         
         public (int value, bool visibility) PrimaryDemon{get;set;}
@@ -103,9 +108,36 @@ namespace StealthBoardStrategy.Server.DataBase{
             if(Calculation.baseVal + Calculation.diff >= 0) return Calculation.baseVal + Calculation.diff;
             else return 0;
         }
-
         public void UpdateVisibility(){
 
+        }
+
+        public ClientUnit ConvertToClientUnit(){
+            ClientUnit instance = new ClientUnit();
+            instance.Id = Id.value;
+            instance.Name = Name.value;
+            instance.LocatedSide = LocatedSide;
+            instance.PositionX = Position.x;
+            instance.PositionY = Position.y;
+            instance.Hp = GetHp();
+            instance.MaxHp = GetMaxHp();
+            instance.HpRegen = GetHpRegen();
+            instance.Shield = GetShield();
+            instance.MaxShield = GetMaxShield();
+            instance.ShieldRegen = GetShieldRegen();
+            instance.Mana = GetMana();
+            instance.MaxMana = GetMaxMana();
+            instance.ManaRegen = GetManaRegen();
+            instance.Stealthiness = GetStealthiness();
+            instance.MaxStealthiness = GetMaxStealthiness();
+            instance.StealthRegen = GetStealthRegen();
+            instance.Atk = GetAtk();
+            instance.Mp = GetMp();
+            instance.Def = GetDef();
+            instance.MR = GetMR();
+            instance.Speed = GetSpeed();
+            instance.Calculation = GetCalculation();
+            return instance;
         }
     }
 }

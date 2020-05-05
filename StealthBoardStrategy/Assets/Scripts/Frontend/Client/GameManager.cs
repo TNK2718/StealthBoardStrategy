@@ -7,6 +7,9 @@ using UnityEngine.SceneManagement;
 
 namespace StealthBoardStrategy.Frontend.Client {
     public class GameManager : MonoBehaviourPunCallbacks {
+        [SerializeField]
+        private string playerPrefabName;
+
         public override void OnLeftRoom () {
             SceneManager.LoadScene (0);
         }
@@ -24,6 +27,15 @@ namespace StealthBoardStrategy.Frontend.Client {
             if (PhotonNetwork.IsMasterClient) {
                 Debug.LogFormat ("OnPlayerLeftRoom IsMasterClient {0}", PhotonNetwork.IsMasterClient);
                 LoadArena ();
+            }
+        }
+
+        private void Start () {
+            if (ClientBattleManager.LocalPlayerInstance == null) {
+                Debug.LogFormat ("We are Instatiating LocalPlayer from {0}", Application.loadedLevelName);
+                PhotonNetwork.Instantiate (this.playerPrefabName, new Vector3 (0, 0, 0), Quaternion.identity);
+            }else{
+                Debug.LogFormat("Ignoring scene load for {0}", SceneManagerHelper.ActiveSceneName);
             }
         }
 
