@@ -38,7 +38,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         public Players Owner{get; set;}
         public Skill[] SkillList;
         public Buff[] BuffList;
-        public ClientUnit[] DemonList;
+        public int[] DemonList;
         public UnitType UnitType;
     }
 }
