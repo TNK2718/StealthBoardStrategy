@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using StealthBoardStrategy.Frontend.Client;
 using StealthBoardStrategy.Server.GameLogic;
+using System.IO;
+using System.Text;
+using System;
 
 namespace StealthBoardStrategy.Server.DataBase {
     public class Unit {
@@ -113,31 +116,31 @@ namespace StealthBoardStrategy.Server.DataBase {
         }
 
         // シリアライズ可能なClientUnit型を生成して返す
-        public ClientUnit ConvertToClientUnit (bool applyVisibility) {  
+        public ClientUnit ConvertToClientUnit (bool applyVisibility) {
             ClientUnit instance = new ClientUnit ();
-            if(!(applyVisibility) || Id.visibility)instance.Id = Id.value;
-            if(!(applyVisibility) || Name.visibility)instance.Name = Name.value;
+            if (!(applyVisibility) || Id.visibility) instance.Id = Id.value;
+            if (!(applyVisibility) || Name.visibility) instance.Name = Name.value;
             instance.LocatedSide = LocatedSide;
-            if(!(applyVisibility) || Position.visibility)instance.PositionX = Position.x;
-            if(!(applyVisibility) || Position.visibility)instance.PositionY = Position.y;
-            if(!(applyVisibility) || Hp.visibility)instance.Hp = GetHp ();
-            if(!(applyVisibility) || MaxHp.visibility)instance.MaxHp = GetMaxHp ();
-            if(!(applyVisibility) || HpRegen.visibility)instance.HpRegen = GetHpRegen ();
-            if(!(applyVisibility) || Shield.visibility)instance.Shield = GetShield ();
-            if(!(applyVisibility) || MaxShield.visibility)instance.MaxShield = GetMaxShield ();
-            if(!(applyVisibility) || ShieldRegen.visibility)instance.ShieldRegen = GetShieldRegen ();
-            if(!(applyVisibility) || Mana.visibility)instance.Mana = GetMana ();
-            if(!(applyVisibility) || MaxMana.visibility)instance.MaxMana = GetMaxMana ();
-            if(!(applyVisibility) || ManaRegen.visibility)instance.ManaRegen = GetManaRegen ();
-            if(!(applyVisibility) || Stealthiness.visibility)instance.Stealthiness = GetStealthiness ();
-            if(!(applyVisibility) || MaxStealthiness.visibility)instance.MaxStealthiness = GetMaxStealthiness ();
-            if(!(applyVisibility) || StealthRegen.visibility)instance.StealthRegen = GetStealthRegen ();
-            if(!(applyVisibility) || Atk.visibility)instance.Atk = GetAtk ();
-            if(!(applyVisibility) || Mp.visibility)instance.Mp = GetMp ();
-            if(!(applyVisibility) || Def.visibility)instance.Def = GetDef ();
-            if(!(applyVisibility) || MR.visibility)instance.MR = GetMR ();
-            if(!(applyVisibility) || Speed.visibility)instance.Speed = GetSpeed ();
-            if(!(applyVisibility) || Calculation.visibility)instance.Calculation = GetCalculation ();
+            if (!(applyVisibility) || Position.visibility) instance.PositionX = Position.x;
+            if (!(applyVisibility) || Position.visibility) instance.PositionY = Position.y;
+            if (!(applyVisibility) || Hp.visibility) instance.Hp = GetHp ();
+            if (!(applyVisibility) || MaxHp.visibility) instance.MaxHp = GetMaxHp ();
+            if (!(applyVisibility) || HpRegen.visibility) instance.HpRegen = GetHpRegen ();
+            if (!(applyVisibility) || Shield.visibility) instance.Shield = GetShield ();
+            if (!(applyVisibility) || MaxShield.visibility) instance.MaxShield = GetMaxShield ();
+            if (!(applyVisibility) || ShieldRegen.visibility) instance.ShieldRegen = GetShieldRegen ();
+            if (!(applyVisibility) || Mana.visibility) instance.Mana = GetMana ();
+            if (!(applyVisibility) || MaxMana.visibility) instance.MaxMana = GetMaxMana ();
+            if (!(applyVisibility) || ManaRegen.visibility) instance.ManaRegen = GetManaRegen ();
+            if (!(applyVisibility) || Stealthiness.visibility) instance.Stealthiness = GetStealthiness ();
+            if (!(applyVisibility) || MaxStealthiness.visibility) instance.MaxStealthiness = GetMaxStealthiness ();
+            if (!(applyVisibility) || StealthRegen.visibility) instance.StealthRegen = GetStealthRegen ();
+            if (!(applyVisibility) || Atk.visibility) instance.Atk = GetAtk ();
+            if (!(applyVisibility) || Mp.visibility) instance.Mp = GetMp ();
+            if (!(applyVisibility) || Def.visibility) instance.Def = GetDef ();
+            if (!(applyVisibility) || MR.visibility) instance.MR = GetMR ();
+            if (!(applyVisibility) || Speed.visibility) instance.Speed = GetSpeed ();
+            if (!(applyVisibility) || Calculation.visibility) instance.Calculation = GetCalculation ();
             instance.ActionPoint = ActionPoint;
             instance.Owner = Owner;
             instance.SkillList = new Skill[SkillList.Count];
@@ -154,6 +157,19 @@ namespace StealthBoardStrategy.Server.DataBase {
             }
             instance.UnitType = UnitType;
             return instance;
+        }
+
+        // データを読み込んでUnitを生成
+        public Unit (int id) {
+            string filePath = @"Assets/Scripts/Server/DataBase/UnitData.csv";
+            StreamReader reader = new StreamReader (filePath, Encoding.GetEncoding ("Shift_JIS"));
+            while (reader.Peek () >= 0) {
+                string[] cols = reader.ReadLine ().Split (',');
+                for (int n = 0; n < cols.Length; n++)
+                    Console.Write (cols[n] + "\t");
+                Console.WriteLine ("");
+            }
+            reader.Close ();
         }
     }
 }

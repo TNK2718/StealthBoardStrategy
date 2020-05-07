@@ -4,6 +4,7 @@ using Photon.Pun;
 using StealthBoardStrategy.Server.DataBase;
 using StealthBoardStrategy.Server.Events;
 using StealthBoardStrategy.Server.GameLogic;
+using StealthBoardStrategy.Frontend.Client;
 using UnityEngine;
 
 namespace StealthBoardStrategy.Server.GameLogic {
@@ -12,14 +13,17 @@ namespace StealthBoardStrategy.Server.GameLogic {
         private int TurnProcessed;
         private float RemainingTime;
         private Players Turn;
-        private List<Unit> UnitList;
+        private List<Unit> UnitList1;
+        private List<Unit> UnitList2;
         private Board Board;
 
         private PhotonView MasterView;
         private PhotonView OtherView;
 
         private void Start () {
-            //SyncBoard ();
+            UnitList1 = new List<Unit>{new Unit(0)};
+            UnitList2 = new List<Unit>{new Unit(0)};
+            SyncBoard ();
         }
 
         [PunRPC]
@@ -30,18 +34,34 @@ namespace StealthBoardStrategy.Server.GameLogic {
         // クライアント側にボードを送信
         public void SyncBoard () {
             string boardJson = JsonUtility.ToJson (Board);
-            Unit[] unitList = new Unit[UnitList.Count];
-            for (int i = 0; i < UnitList.Count; i++) {
-                unitList[i] = UnitList[i];
+            ClientUnit[] unitList11 = new ClientUnit[UnitList1.Count]; 
+            ClientUnit[] unitList12 = new ClientUnit[UnitList1.Count]; 
+            ClientUnit[] unitList21 = new ClientUnit[UnitList2.Count]; 
+            ClientUnit[] unitList22 = new ClientUnit[UnitList2.Count]; 
+            for (int i = 0; i < UnitList1.Count; i++) {
+                unitList11[i] = UnitList1[i].ConvertToClientUnit(false);
+                unitList12[i] = UnitList1[i].ConvertToClientUnit(true);
+                unitList21[i] = UnitList2[i].ConvertToClientUnit(true);
+                unitList22[i] = UnitList2[i].ConvertToClientUnit(false);
             }
-            string unitListJson = JsonUtility.ToJson (unitList);
-            object[] args = new object[] {
+            string unitListJson11 = JsonUtility.ToJson(unitList11);
+            string unitListJson12 = JsonUtility.ToJson(unitList12);
+            string unitListJson21 = JsonUtility.ToJson(unitList21);
+            string unitListJson22 = JsonUtility.ToJson(unitList22);
+            object[] args1 = new object[] {
                 "SyncBoard",
                 boardJson,
-                unitListJson
+                unitListJson11,
+                unitListJson21,
             };
-            MasterView.RPC ("SyncBoard", RpcTarget.AllViaServer, args);
-            OtherView.RPC ("SyncBoard", RpcTarget.AllViaServer, args);
+            object[] args2 = new object[] {
+                "SyncBoard",
+                boardJson,
+                unitListJson12,
+                unitListJson22,
+            };
+            MasterView.RPC ("SyncBoard", RpcTarget.AllViaServer, args1);
+            OtherView.RPC ("SyncBoard", RpcTarget.AllViaServer, args2);
         }
         public void BattleLoop () {
             if (!PhotonNetwork.IsMasterClient) return;
@@ -56,14 +76,14 @@ namespace StealthBoardStrategy.Server.GameLogic {
         private void ActionProcess (ActionEvent actionEvent) {
             if (!PhotonNetwork.IsMasterClient) return;
             // TODO: プレイヤーの識別, 認証
-            switch (UnitList[actionEvent.Invoker].SkillList[actionEvent.ActionNo].SkillType) {
+            /*switch (UnitList[actionEvent.Invoker].SkillList[actionEvent.ActionNo].SkillType) {
                 case SkillType.Move:
                     break;
                 case SkillType.Attack:
                     break;
                 default:
                     break;
-            }
+            }*/
         }
         private void EndProcess () {
             if (!PhotonNetwork.IsMasterClient) return;
