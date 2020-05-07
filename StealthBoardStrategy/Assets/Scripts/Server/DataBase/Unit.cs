@@ -1,9 +1,9 @@
+using System;
 using System.Collections.Generic;
-using StealthBoardStrategy.Frontend.Client;
-using StealthBoardStrategy.Server.GameLogic;
 using System.IO;
 using System.Text;
-using System;
+using StealthBoardStrategy.Frontend.Client;
+using StealthBoardStrategy.Server.GameLogic;
 
 namespace StealthBoardStrategy.Server.DataBase {
     public class Unit {
@@ -11,7 +11,6 @@ namespace StealthBoardStrategy.Server.DataBase {
         protected (string value, bool visibility) Name { get; set; }
         public Players LocatedSide;
         public (int x, int y, bool visibility) Position { get; set; }
-        protected bool IsActive;
         public (int baseVal, int diff, bool visibility) Hp { get; set; }
         public (int baseVal, int diff, bool visibility) MaxHp { get; set; }
         public (int baseVal, int diff, bool visibility) HpRegen { get; set; }
@@ -31,6 +30,8 @@ namespace StealthBoardStrategy.Server.DataBase {
         public (int baseVal, int diff, bool visibility) Speed { get; set; }
         public (int baseVal, int diff, bool visibility) Calculation { get; set; }
         public int ActionPoint { get; set; }
+        protected bool IsActive;
+
         public Players Owner { get; set; }
         public List<Skill> SkillList;
         public List<Buff> BuffList;
@@ -163,11 +164,22 @@ namespace StealthBoardStrategy.Server.DataBase {
         public Unit (int id) {
             string filePath = @"Assets/Scripts/Server/DataBase/UnitData.csv";
             StreamReader reader = new StreamReader (filePath, Encoding.GetEncoding ("Shift_JIS"));
+            int count = 0;
             while (reader.Peek () >= 0) {
-                string[] cols = reader.ReadLine ().Split (',');
-                for (int n = 0; n < cols.Length; n++)
-                    Console.Write (cols[n] + "\t");
-                Console.WriteLine ("");
+                if (count == id) {
+                    string[] cols = reader.ReadLine ().Split (',');
+                    Id = (id, false);
+                    Name = (cols[1], false);
+                    LocatedSide = (Players) Enum.Parse(typeof(Players), cols[2]);
+                    Position = (int.Parse(cols[3]), int.Parse(cols[4]), false);
+                    Hp = (int.Parse(cols[5]), 0, false);
+                    MaxHp = (int.Parse(cols[6]), 0, false);
+                    HpRegen = (int.Parse(cols[7]), 0, false);
+                    Shield = (int.Parse(cols[8]), 0, false);
+                    MaxShield = (int.Parse(cols[9]), 0, false);
+                    IsActive = true;
+                }
+                count++;
             }
             reader.Close ();
         }
