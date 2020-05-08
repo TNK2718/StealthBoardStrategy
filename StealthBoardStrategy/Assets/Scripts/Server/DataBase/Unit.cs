@@ -21,22 +21,21 @@ namespace StealthBoardStrategy.Server.DataBase {
         public (int baseVal, int diff, bool visibility) MaxMana { get; set; }
         public (int baseVal, int diff, bool visibility) ManaRegen { get; set; }
         public (int baseVal, int diff, bool visibility) Stealthiness { get; set; }
-        public (int baseVal, int diff, bool visibility) StealthRegen { get; set; }
         public (int baseVal, int diff, bool visibility) MaxStealthiness { get; set; }
+        public (int baseVal, int diff, bool visibility) StealthRegen { get; set; }
         public (int baseVal, int diff, bool visibility) Atk { get; set; }
         public (int baseVal, int diff, bool visibility) Mp { get; set; }
         public (int baseVal, int diff, bool visibility) Def { get; set; }
         public (int baseVal, int diff, bool visibility) MR { get; set; }
         public (int baseVal, int diff, bool visibility) Speed { get; set; }
         public (int baseVal, int diff, bool visibility) Calculation { get; set; }
-        public int ActionPoint { get; set; }
-        protected bool IsActive;
-
         public Players Owner { get; set; }
         public List<Skill> SkillList;
         public List<Buff> BuffList;
         public List<int> DemonList; // Demon's ID
         public UnitType UnitType;
+        public int ActionPoint { get; set; }
+        protected bool IsActive;
 
         public (int value, bool visibility) PrimaryDemon { get; set; }
 
@@ -80,12 +79,12 @@ namespace StealthBoardStrategy.Server.DataBase {
             if (Stealthiness.baseVal + Stealthiness.diff >= 0) return Stealthiness.baseVal + Stealthiness.diff;
             else return 0;
         }
-        public int GetStealthRegen () {
-            if (StealthRegen.baseVal + StealthRegen.diff >= 0) return StealthRegen.baseVal + StealthRegen.diff;
-            else return 0;
-        }
         public int GetMaxStealthiness () {
             if (MaxStealthiness.baseVal + MaxStealthiness.diff >= 0) return MaxStealthiness.baseVal + MaxStealthiness.diff;
+            else return 0;
+        }
+        public int GetStealthRegen () {
+            if (StealthRegen.baseVal + StealthRegen.diff >= 0) return StealthRegen.baseVal + StealthRegen.diff;
             else return 0;
         }
         public int GetAtk () {
@@ -161,7 +160,7 @@ namespace StealthBoardStrategy.Server.DataBase {
         }
 
         // データを読み込んでUnitを生成
-        public Unit (int id) {
+        public Unit (int id, Players locatedSide, int x, int y, Players owner) {
             string filePath = @"Assets/Scripts/Server/DataBase/UnitData.csv";
             StreamReader reader = new StreamReader (filePath, Encoding.GetEncoding ("Shift_JIS"));
             int count = 0;
@@ -169,16 +168,42 @@ namespace StealthBoardStrategy.Server.DataBase {
                 if (count == id) {
                     string[] cols = reader.ReadLine ().Split (',');
                     Id = (id, false);
-                    Name = (cols[1], false);
-                    LocatedSide = (Players) Enum.Parse(typeof(Players), cols[2]);
-                    Position = (int.Parse(cols[3]), int.Parse(cols[4]), false);
-                    Hp = (int.Parse(cols[5]), 0, false);
-                    MaxHp = (int.Parse(cols[6]), 0, false);
-                    HpRegen = (int.Parse(cols[7]), 0, false);
-                    Shield = (int.Parse(cols[8]), 0, false);
-                    MaxShield = (int.Parse(cols[9]), 0, false);
+                    Name = (cols[1], false); // 0はid
+                    LocatedSide = locatedSide;
+                    Position = (x, y, false);
+                    Hp = (int.Parse (cols[2]), 0, false);
+                    MaxHp = (int.Parse (cols[3]), 0, false);
+                    HpRegen = (int.Parse (cols[4]), 0, false);
+                    Shield = (int.Parse (cols[5]), 0, false);
+                    MaxShield = (int.Parse (cols[6]), 0, false);
+                    ShieldRegen = (int.Parse (cols[7]), 0, false);
+                    Mana = (int.Parse (cols[8]), 0, false);
+                    MaxMana = (int.Parse (cols[9]), 0, false);
+                    ManaRegen = (int.Parse (cols[10]), 0, false);
+                    Stealthiness = (int.Parse (cols[11]), 0, false);
+                    MaxStealthiness = (int.Parse (cols[12]), 0, false);
+                    StealthRegen = (int.Parse (cols[13]), 0, false);
+                    Atk = (int.Parse (cols[14]), 0, false);
+                    Mp = (int.Parse (cols[15]), 0, false);
+                    Def = (int.Parse (cols[16]), 0, false);
+                    MR = (int.Parse (cols[17]), 0, false);
+                    Speed = (int.Parse (cols[18]), 0, false);
+                    Calculation = (int.Parse (cols[19]), 0, false);
+                    ActionPoint = 0;
                     IsActive = true;
+                    Owner = owner;
+                    int skillnum = int.Parse (cols[20]);
+                    SkillList = new List<Skill> ();
+                    if (skillnum != 0) {
+                        for (int i = 0; i < skillnum; i++) {
+                            SkillList.Add(new Skill(int.Parse(cols[20 + i])));
+                        }
+                    }
+                    int buffnum = int.Parse (cols[20 + skillnum + 1]);
+                    
+                    break;
                 }
+                reader.ReadLine();
                 count++;
             }
             reader.Close ();
