@@ -162,7 +162,8 @@ namespace StealthBoardStrategy.Server.DataBase {
         // データを読み込んでUnitを生成
         public Unit (int id, Players locatedSide, int x, int y, Players owner) {
             string filePath = @"Assets/Scripts/Server/DataBase/UnitData.csv";
-            StreamReader reader = new StreamReader (filePath, Encoding.GetEncoding ("Shift_JIS"));
+            var fs = new FileStream (filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            StreamReader reader = new StreamReader (fs, Encoding.GetEncoding ("Shift_JIS"));
             int count = 0;
             while (reader.Peek () >= 0) {
                 if (count == id) {
@@ -189,24 +190,35 @@ namespace StealthBoardStrategy.Server.DataBase {
                     MR = (int.Parse (cols[17]), 0, false);
                     Speed = (int.Parse (cols[18]), 0, false);
                     Calculation = (int.Parse (cols[19]), 0, false);
+                    UnitType = (UnitType) Enum.Parse (typeof (UnitType), cols[20]);
                     ActionPoint = 0;
                     IsActive = true;
                     Owner = owner;
-                    int skillnum = int.Parse (cols[20]);
+                    int skillnum = int.Parse (cols[21]);
                     SkillList = new List<Skill> ();
                     if (skillnum != 0) {
-                        for (int i = 0; i < skillnum; i++) {
-                            SkillList.Add(new Skill(int.Parse(cols[20 + i])));
+                        for (int i = 1; i <= skillnum; i++) {
+                            SkillList.Add (new Skill (int.Parse (cols[21 + i])));
                         }
                     }
-                    int buffnum = int.Parse (cols[20 + skillnum + 1]);
-                    
+                    BuffList = new List<Buff> ();
+                    int buffnum = int.Parse (cols[21 + skillnum + 1]);
+                    if (buffnum != 0) {
+                        for (int i = 1; i <= skillnum; i++) {
+                            BuffList.Add (new Buff ((BuffType) Enum.Parse (typeof (BuffType), cols[21 + skillnum + 1 + i]), 0, Buff.INF));
+                        }
+                    }
+                    // TODO: DemonList
+                    DemonList = new List<int> ();
+
                     break;
                 }
-                reader.ReadLine();
+                reader.ReadLine ();
                 count++;
             }
             reader.Close ();
+
         }
+
     }
 }

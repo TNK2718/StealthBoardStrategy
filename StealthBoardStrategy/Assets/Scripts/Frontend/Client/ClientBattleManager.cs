@@ -35,6 +35,7 @@ namespace StealthBoardStrategy.Frontend.Client {
             for (int i = 0; i < unitList2.Length; i++) {
                 UnitList2[i] = unitList2[i];
             }
+            Debug.Log(UnitList1[0].Hp);
         }
 
         private void Awake () {

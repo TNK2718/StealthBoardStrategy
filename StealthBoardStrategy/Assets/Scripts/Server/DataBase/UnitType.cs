@@ -1,5 +1,5 @@
 namespace StealthBoardStrategy.Server.DataBase{
     public enum UnitType{
-        None, Player, Minion
+        None, Player, Minion, Demon
     }
 }

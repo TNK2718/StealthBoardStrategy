@@ -21,8 +21,10 @@ namespace StealthBoardStrategy.Server.GameLogic {
         private PhotonView OtherView;
 
         private void Start () {
-            UnitList1 = new List<Unit>{new Unit(0)};
-            UnitList2 = new List<Unit>{new Unit(0)};
+            
+            // test
+            UnitList1 = new List<Unit>{new Unit(0, Players.Player1, 0, 0, Players.Player1)};
+            UnitList2 = new List<Unit>{new Unit(0, Players.Player2, 0, 0, Players.Player2)};
             SyncBoard ();
         }
 
