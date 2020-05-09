@@ -17,11 +17,12 @@ namespace StealthBoardStrategy.Server.GameLogic {
         private List<Unit> UnitList2;
         private Board Board;
 
-        private PhotonView MasterView;
-        private PhotonView OtherView;
+
+        public GameObject MasterPlayer;
+        public GameObject GuestPlayer;
 
         private void Start () {
-            
+
             // test
             UnitList1 = new List<Unit>{new Unit(0, Players.Player1, 0, 0, Players.Player1)};
             UnitList2 = new List<Unit>{new Unit(0, Players.Player2, 0, 0, Players.Player2)};
@@ -62,8 +63,8 @@ namespace StealthBoardStrategy.Server.GameLogic {
                 unitListJson12,
                 unitListJson22,
             };
-            MasterView.RPC ("SyncBoard", RpcTarget.AllViaServer, args1);
-            OtherView.RPC ("SyncBoard", RpcTarget.AllViaServer, args2);
+            // MasterView.RPC ("SyncBoard", RpcTarget.AllViaServer, args1);
+            // OtherView.RPC ("SyncBoard", RpcTarget.AllViaServer, args2);
         }
         public void BattleLoop () {
             if (!PhotonNetwork.IsMasterClient) return;
@@ -71,11 +72,11 @@ namespace StealthBoardStrategy.Server.GameLogic {
         private void TurnStart () {
 
         }
-        private void PreProcess () {
+        private void PrePhase () {
             if (!PhotonNetwork.IsMasterClient) return;
         }
         // クライアントから送られてきたActionEventを受け取って処理
-        private void ActionProcess (ActionEvent actionEvent) {
+        private void ActionPhase (ActionEvent actionEvent) {
             if (!PhotonNetwork.IsMasterClient) return;
             // TODO: プレイヤーの識別, 認証
             /*switch (UnitList[actionEvent.Invoker].SkillList[actionEvent.ActionNo].SkillType) {
@@ -87,7 +88,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
                     break;
             }*/
         }
-        private void EndProcess () {
+        private void EndPhase () {
             if (!PhotonNetwork.IsMasterClient) return;
         }
         public void TurnEnd () {

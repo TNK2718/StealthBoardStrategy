@@ -14,6 +14,8 @@ namespace StealthBoardStrategy.Frontend.Client {
     public class ClientBattleManager : MonoBehaviourPun {
         public static GameObject LocalPlayerInstance;
         public const int MaxUnits = 3;
+        [SerializeField]
+        private GameObject Master;
 
         private Board Board;
         private List<ClientUnit> UnitList1;
@@ -35,12 +37,16 @@ namespace StealthBoardStrategy.Frontend.Client {
             for (int i = 0; i < unitList2.Length; i++) {
                 UnitList2[i] = unitList2[i];
             }
-            Debug.Log(UnitList1[0].Hp);
+            Debug.Log (UnitList1[0].Hp);
         }
 
         private void Awake () {
+            BattleManager battleManager = Master.GetComponent<BattleManager> ();
             if (photonView.IsMine) {
                 LocalPlayerInstance = this.gameObject;
+                battleManager.MasterPlayer = this.gameObject; // battleManagerにプレイヤーを登録
+            }else{
+                battleManager.GuestPlayer = this.gameObject;
             }
             DontDestroyOnLoad (this.gameObject);
         }
