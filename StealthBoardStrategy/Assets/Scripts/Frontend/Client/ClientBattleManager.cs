@@ -25,17 +25,21 @@ namespace StealthBoardStrategy.Frontend.Client {
         // サーバー側からRPCする
         [PunRPC]
         public void SyncBoard (string msg, string boardJson, string unitListJson1, string unitListJson2, PhotonMessageInfo info) {
-            Board board = JsonUtility.FromJson<Board> (boardJson);
-            ClientUnit[] unitList1 = JsonUtility.FromJson<ClientUnit[]> (unitListJson1);
-            ClientUnit[] unitList2 = JsonUtility.FromJson<ClientUnit[]> (unitListJson2);
-            Board = board;
-            UnitList1 = new List<ClientUnit> (unitList1.Length);
-            for (int i = 0; i < unitList1.Length; i++) {
-                UnitList1[i] = unitList1[i];
-            }
-            UnitList2 = new List<ClientUnit> (unitList2.Length);
-            for (int i = 0; i < unitList2.Length; i++) {
-                UnitList2[i] = unitList2[i];
+            try {
+                Board board = JsonUtility.FromJson<Board> (boardJson);
+                ClientUnit[] unitList1 = JsonUtility.FromJson<ClientUnit[]> (unitListJson1);
+                ClientUnit[] unitList2 = JsonUtility.FromJson<ClientUnit[]> (unitListJson2);
+                Board = board;
+                UnitList1 = new List<ClientUnit> (unitList1.Length);
+                for (int i = 0; i < unitList1.Length; i++) {
+                    UnitList1[i] = unitList1[i];
+                }
+                UnitList2 = new List<ClientUnit> (unitList2.Length);
+                for (int i = 0; i < unitList2.Length; i++) {
+                    UnitList2[i] = unitList2[i];
+                }
+            }catch{
+                
             }
             Debug.Log (UnitList1[0].Hp);
         }
@@ -44,9 +48,11 @@ namespace StealthBoardStrategy.Frontend.Client {
             BattleManager battleManager = Master.GetComponent<BattleManager> ();
             if (photonView.IsMine) {
                 LocalPlayerInstance = this.gameObject;
-                battleManager.MasterPlayer = this.gameObject; // battleManagerにプレイヤーを登録
-            }else{
-                battleManager.GuestPlayer = this.gameObject;
+                if (PhotonNetwork.IsMasterClient) battleManager.MasterPlayer = this.gameObject; // battleManagerにプレイヤーを登録
+                else battleManager.GuestPlayer = this.gameObject;
+            } else {
+                if (PhotonNetwork.IsMasterClient) battleManager.GuestPlayer = this.gameObject;
+                else battleManager.MasterPlayer = this.gameObject;
             }
             DontDestroyOnLoad (this.gameObject);
         }

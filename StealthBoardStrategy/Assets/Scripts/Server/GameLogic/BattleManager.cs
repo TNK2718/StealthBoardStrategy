@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Photon.Pun;
+using StealthBoardStrategy.Frontend.Client;
 using StealthBoardStrategy.Server.DataBase;
 using StealthBoardStrategy.Server.Events;
 using StealthBoardStrategy.Server.GameLogic;
-using StealthBoardStrategy.Frontend.Client;
 using UnityEngine;
 
 namespace StealthBoardStrategy.Server.GameLogic {
@@ -17,15 +17,14 @@ namespace StealthBoardStrategy.Server.GameLogic {
         private List<Unit> UnitList2;
         private Board Board;
 
-
         public GameObject MasterPlayer;
         public GameObject GuestPlayer;
 
         private void Start () {
 
             // test
-            UnitList1 = new List<Unit>{new Unit(0, Players.Player1, 0, 0, Players.Player1)};
-            UnitList2 = new List<Unit>{new Unit(0, Players.Player2, 0, 0, Players.Player2)};
+            UnitList1 = new List<Unit> { new Unit (0, Players.Player1, 0, 0, Players.Player1) };
+            UnitList2 = new List<Unit> { new Unit (0, Players.Player2, 0, 0, Players.Player2) };
             SyncBoard ();
         }
 
@@ -36,35 +35,41 @@ namespace StealthBoardStrategy.Server.GameLogic {
 
         // クライアント側にボードを送信
         public void SyncBoard () {
-            string boardJson = JsonUtility.ToJson (Board);
-            ClientUnit[] unitList11 = new ClientUnit[UnitList1.Count]; 
-            ClientUnit[] unitList12 = new ClientUnit[UnitList1.Count]; 
-            ClientUnit[] unitList21 = new ClientUnit[UnitList2.Count]; 
-            ClientUnit[] unitList22 = new ClientUnit[UnitList2.Count]; 
-            for (int i = 0; i < UnitList1.Count; i++) {
-                unitList11[i] = UnitList1[i].ConvertToClientUnit(false);
-                unitList12[i] = UnitList1[i].ConvertToClientUnit(true);
-                unitList21[i] = UnitList2[i].ConvertToClientUnit(true);
-                unitList22[i] = UnitList2[i].ConvertToClientUnit(false);
+            try {
+                string boardJson = JsonUtility.ToJson (Board);
+                ClientUnit[] unitList11 = new ClientUnit[UnitList1.Count];
+                ClientUnit[] unitList12 = new ClientUnit[UnitList1.Count];
+                ClientUnit[] unitList21 = new ClientUnit[UnitList2.Count];
+                ClientUnit[] unitList22 = new ClientUnit[UnitList2.Count];
+                for (int i = 0; i < UnitList1.Count; i++) {
+                    unitList11[i] = UnitList1[i].ConvertToClientUnit (false);
+                    unitList12[i] = UnitList1[i].ConvertToClientUnit (true);
+                    unitList21[i] = UnitList2[i].ConvertToClientUnit (true);
+                    unitList22[i] = UnitList2[i].ConvertToClientUnit (false);
+                }
+                string unitListJson11 = JsonUtility.ToJson (unitList11);
+                string unitListJson12 = JsonUtility.ToJson (unitList12);
+                string unitListJson21 = JsonUtility.ToJson (unitList21);
+                string unitListJson22 = JsonUtility.ToJson (unitList22);
+                object[] args1 = new object[] {
+                    "SyncBoard",
+                    boardJson,
+                    unitListJson11,
+                    unitListJson21,
+                };
+                object[] args2 = new object[] {
+                    "SyncBoard",
+                    boardJson,
+                    unitListJson12,
+                    unitListJson22,
+                };
+            
+            MasterPlayer.GetComponent<PhotonView> ().RPC ("SyncBoard", RpcTarget.AllViaServer, args1);
+            GuestPlayer.GetComponent<PhotonView> ().RPC ("SyncBoard", RpcTarget.AllViaServer, args2);
             }
-            string unitListJson11 = JsonUtility.ToJson(unitList11);
-            string unitListJson12 = JsonUtility.ToJson(unitList12);
-            string unitListJson21 = JsonUtility.ToJson(unitList21);
-            string unitListJson22 = JsonUtility.ToJson(unitList22);
-            object[] args1 = new object[] {
-                "SyncBoard",
-                boardJson,
-                unitListJson11,
-                unitListJson21,
-            };
-            object[] args2 = new object[] {
-                "SyncBoard",
-                boardJson,
-                unitListJson12,
-                unitListJson22,
-            };
-            // MasterView.RPC ("SyncBoard", RpcTarget.AllViaServer, args1);
-            // OtherView.RPC ("SyncBoard", RpcTarget.AllViaServer, args2);
+            catch {
+
+            }
         }
         public void BattleLoop () {
             if (!PhotonNetwork.IsMasterClient) return;
