@@ -219,7 +219,7 @@ namespace StealthBoardStrategy.Server.DataBase {
                 }
                 reader.Close ();
             }catch{
-
+                Console.WriteLine("Unit.cs初期化エラー");
             }
         }
 

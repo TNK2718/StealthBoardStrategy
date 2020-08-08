@@ -24,24 +24,22 @@ namespace StealthBoardStrategy.Frontend.Client {
         // ボードとキャラを同期
         // サーバー側からRPCする
         [PunRPC]
-        public void SyncBoard (string msg, string boardJson, string unitListJson1, string unitListJson2, PhotonMessageInfo info) {
+        public void SyncBoard (string msg, string boardJson, string[] unitListJson1, string[] unitListJson2, PhotonMessageInfo info) {
             try {
                 Board board = JsonUtility.FromJson<Board> (boardJson);
-                ClientUnit[] unitList1 = JsonUtility.FromJson<ClientUnit[]> (unitListJson1);
-                ClientUnit[] unitList2 = JsonUtility.FromJson<ClientUnit[]> (unitListJson2);
                 Board = board;
-                UnitList1 = new List<ClientUnit> (unitList1.Length);
-                for (int i = 0; i < unitList1.Length; i++) {
-                    UnitList1[i] = unitList1[i];
+                UnitList1 = new List<ClientUnit> (unitListJson1.Length);
+                for (int i = 0; i < unitListJson1.Length; i++) {
+                    UnitList1[i] = JsonUtility.FromJson<ClientUnit>(unitListJson1[i]);
                 }
-                UnitList2 = new List<ClientUnit> (unitList2.Length);
-                for (int i = 0; i < unitList2.Length; i++) {
-                    UnitList2[i] = unitList2[i];
+                UnitList2 = new List<ClientUnit> (unitListJson2.Length);
+                for (int i = 0; i < unitListJson2.Length; i++) {
+                    UnitList2[i] = JsonUtility.FromJson<ClientUnit>(unitListJson2[i]);
                 }
             }catch{
-                
+
             }
-            Debug.Log (UnitList1[0].Hp);
+            Debug.Log(UnitList1[0].Hp);
         }
 
         private void Awake () {

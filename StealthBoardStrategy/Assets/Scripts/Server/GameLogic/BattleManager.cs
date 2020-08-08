@@ -47,10 +47,22 @@ namespace StealthBoardStrategy.Server.GameLogic {
                     unitList21[i] = UnitList2[i].ConvertToClientUnit (true);
                     unitList22[i] = UnitList2[i].ConvertToClientUnit (false);
                 }
-                string unitListJson11 = JsonUtility.ToJson (unitList11);
-                string unitListJson12 = JsonUtility.ToJson (unitList12);
-                string unitListJson21 = JsonUtility.ToJson (unitList21);
-                string unitListJson22 = JsonUtility.ToJson (unitList22);
+                string[] unitListJson11 = new string[unitList11.Length];
+                string[] unitListJson12 = new string[unitList12.Length];
+                string[] unitListJson21 = new string[unitList21.Length];
+                string[] unitListJson22 = new string[unitList22.Length];
+                for(int i = 0; i < unitList11.Length; i++){
+                    unitListJson11[i] = JsonUtility.ToJson(unitList11[i]);
+                }
+                for(int i = 0; i < unitList12.Length; i++){
+                    unitListJson12[i] = JsonUtility.ToJson(unitList12[i]);
+                }
+                for(int i = 0; i < unitList21.Length; i++){
+                    unitListJson21[i] = JsonUtility.ToJson(unitList21[i]);
+                }
+                for(int i = 0; i < unitList22.Length; i++){
+                    unitListJson22[i] = JsonUtility.ToJson(unitList22[i]);
+                }
                 object[] args1 = new object[] {
                     "SyncBoard",
                     boardJson,
@@ -63,11 +75,10 @@ namespace StealthBoardStrategy.Server.GameLogic {
                     unitListJson12,
                     unitListJson22,
                 };
-            
-            MasterPlayer.GetComponent<PhotonView> ().RPC ("SyncBoard", RpcTarget.AllViaServer, args1);
-            GuestPlayer.GetComponent<PhotonView> ().RPC ("SyncBoard", RpcTarget.AllViaServer, args2);
-            }
-            catch {
+
+                MasterPlayer.GetComponent<PhotonView> ().RPC ("SyncBoard", RpcTarget.AllViaServer, args1);
+                GuestPlayer.GetComponent<PhotonView> ().RPC ("SyncBoard", RpcTarget.AllViaServer, args2);
+            } catch {
 
             }
         }
