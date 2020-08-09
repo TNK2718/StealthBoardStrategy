@@ -143,13 +143,22 @@ namespace StealthBoardStrategy.Server.DataBase {
             if (!(applyVisibility) || Calculation.visibility) instance.Calculation = GetCalculation ();
             instance.ActionPoint = ActionPoint;
             instance.Owner = Owner;
-            instance.SkillList = new Skill[SkillList.Count];
+            instance.SkillList = new int[SkillList.Count];
             for (int i = 0; i < SkillList.Count; i++) {
-                instance.SkillList[i] = SkillList[i];
+                instance.SkillList[i] = SkillList[i].Id;
             }
-            instance.BuffList = new Buff[BuffList.Count];
+            // BuffList
+            instance.BuffTypeList = new BuffType[BuffList.Count];
             for (int i = 0; i < BuffList.Count; i++) {
-                instance.BuffList[i] = BuffList[i];
+                instance.BuffTypeList[i] = BuffList[i].Type;
+            }
+            instance.BuffPowerList = new int[BuffList.Count];
+            for (int i = 0; i < BuffList.Count; i++) {
+                instance.BuffPowerList[i] = BuffList[i].Power;
+            }
+            instance.BuffDurationList = new int[BuffList.Count];
+            for (int i = 0; i < BuffList.Count; i++) {
+                instance.BuffDurationList[i] = BuffList[i].Duration;
             }
             instance.DemonList = new int[DemonList.Count];
             for (int i = 0; i < DemonList.Count; i++) {
@@ -218,8 +227,8 @@ namespace StealthBoardStrategy.Server.DataBase {
                     count++;
                 }
                 reader.Close ();
-            }catch{
-                Console.WriteLine("Unit.cs初期化エラー");
+            } catch {
+                Console.WriteLine ("Unit.cs初期化エラー");
             }
         }
 

@@ -28,18 +28,18 @@ namespace StealthBoardStrategy.Frontend.Client {
             try {
                 Board board = JsonUtility.FromJson<Board> (boardJson);
                 Board = board;
-                UnitList1 = new List<ClientUnit> (unitListJson1.Length);
+                UnitList1.Clear();
                 for (int i = 0; i < unitListJson1.Length; i++) {
-                    UnitList1[i] = JsonUtility.FromJson<ClientUnit>(unitListJson1[i]);
+                    UnitList1.Add(JsonUtility.FromJson<ClientUnit>(unitListJson1[i]));
                 }
-                UnitList2 = new List<ClientUnit> (unitListJson2.Length);
+                UnitList2.Clear();
                 for (int i = 0; i < unitListJson2.Length; i++) {
-                    UnitList2[i] = JsonUtility.FromJson<ClientUnit>(unitListJson2[i]);
+                    UnitList2.Add(JsonUtility.FromJson<ClientUnit>(unitListJson2[i]));
                 }
             }catch{
-
+                Debug.Log("SyncBoardError");
             }
-            Debug.Log(UnitList1[0].Hp);
+            Debug.Log(UnitList1[0].Id);
         }
 
         private void Awake () {
