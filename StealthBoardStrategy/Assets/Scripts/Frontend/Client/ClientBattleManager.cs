@@ -39,7 +39,6 @@ namespace StealthBoardStrategy.Frontend.Client {
             }catch{
                 Debug.Log("SyncBoardError");
             }
-            Debug.Log(UnitList1[0].Id);
         }
 
         private void Awake () {

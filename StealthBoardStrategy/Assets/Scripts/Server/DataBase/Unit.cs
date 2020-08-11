@@ -4,41 +4,45 @@ using System.IO;
 using System.Text;
 using StealthBoardStrategy.Frontend.Client;
 using StealthBoardStrategy.Server.GameLogic;
+using UnityEngine;
 
 namespace StealthBoardStrategy.Server.DataBase {
     public class Unit {
-        public (int value, bool visibility) Id { get; set; }
-        protected (string value, bool visibility) Name { get; set; }
+        public (int value, bool visibility) Id;
+        protected (string value, bool visibility) Name;
         public Players LocatedSide;
-        public (int x, int y, bool visibility) Position { get; set; }
-        public (int baseVal, int diff, bool visibility) Hp { get; set; }
-        public (int baseVal, int diff, bool visibility) MaxHp { get; set; }
-        public (int baseVal, int diff, bool visibility) HpRegen { get; set; }
-        public (int baseVal, int diff, bool visibility) Shield { get; set; }
-        public (int baseVal, int diff, bool visibility) MaxShield { get; set; }
-        public (int baseVal, int diff, bool visibility) ShieldRegen { get; set; }
-        public (int baseVal, int diff, bool visibility) Mana { get; set; }
-        public (int baseVal, int diff, bool visibility) MaxMana { get; set; }
-        public (int baseVal, int diff, bool visibility) ManaRegen { get; set; }
-        public (int baseVal, int diff, bool visibility) Stealthiness { get; set; }
-        public (int baseVal, int diff, bool visibility) MaxStealthiness { get; set; }
-        public (int baseVal, int diff, bool visibility) StealthRegen { get; set; }
-        public (int baseVal, int diff, bool visibility) Atk { get; set; }
-        public (int baseVal, int diff, bool visibility) Mp { get; set; }
-        public (int baseVal, int diff, bool visibility) Def { get; set; }
-        public (int baseVal, int diff, bool visibility) MR { get; set; }
-        public (int baseVal, int diff, bool visibility) Speed { get; set; }
-        public (int baseVal, int diff, bool visibility) Calculation { get; set; }
-        public Players Owner { get; set; }
+        private (int x, int y, bool visibility) Position;
+        private (int baseVal, int diff, bool visibility) Hp;
+        public (int baseVal, int diff, bool visibility) MaxHp;
+        public (int baseVal, int diff, bool visibility) HpRegen;
+        private (int baseVal, int diff, bool visibility) Shield;
+        public (int baseVal, int diff, bool visibility) MaxShield;
+        public (int baseVal, int diff, bool visibility) ShieldRegen;
+        private (int baseVal, int diff, bool visibility) Mana;
+        public (int baseVal, int diff, bool visibility) MaxMana;
+        public (int baseVal, int diff, bool visibility) ManaRegen;
+        public (int baseVal, int diff, bool visibility) Stealthiness;
+        public (int baseVal, int diff, bool visibility) MaxStealthiness;
+        public (int baseVal, int diff, bool visibility) StealthRegen;
+        public (int baseVal, int diff, bool visibility) Atk;
+        public (int baseVal, int diff, bool visibility) Mp;
+        public (int baseVal, int diff, bool visibility) Def;
+        public (int baseVal, int diff, bool visibility) MR;
+        public (int baseVal, int diff, bool visibility) Speed;
+        public (int baseVal, int diff, bool visibility) Calculation;
+        public Players Owner;
         public List<Skill> SkillList;
         public List<Buff> BuffList;
         public List<int> DemonList; // Demon's ID
         public UnitType UnitType;
-        public int ActionPoint { get; set; }
+        public int ActionPoint;
         protected bool IsActive;
 
-        public (int value, bool visibility) PrimaryDemon { get; set; }
+        public (int value, bool visibility) PrimaryDemon;
 
+        public (int x, int y) GetPosition(){
+            return (Position.x, Position.y);
+        }
         public int GetHp () {
             if (Hp.baseVal + Hp.diff >= 0) return Hp.baseVal + Hp.diff;
             else return 0;
@@ -76,8 +80,7 @@ namespace StealthBoardStrategy.Server.DataBase {
             else return 0;
         }
         public int GetStealthiness () {
-            if (Stealthiness.baseVal + Stealthiness.diff >= 0) return Stealthiness.baseVal + Stealthiness.diff;
-            else return 0;
+            return Stealthiness.baseVal + Stealthiness.diff;
         }
         public int GetMaxStealthiness () {
             if (MaxStealthiness.baseVal + MaxStealthiness.diff >= 0) return MaxStealthiness.baseVal + MaxStealthiness.diff;
@@ -111,8 +114,117 @@ namespace StealthBoardStrategy.Server.DataBase {
             if (Calculation.baseVal + Calculation.diff >= 0) return Calculation.baseVal + Calculation.diff;
             else return 0;
         }
-        public void UpdateVisibility () {
 
+        // 0>=: 見えない, -calc <  < 0: 位置のみ, -calc <: 
+        public void UpdateVisibility () {
+            if (GetStealthiness () >= 0) {
+                Id.visibility = false;
+                Name.visibility = false;
+                Position.visibility = false;
+                Hp.visibility = false;
+                MaxHp.visibility = false;
+                HpRegen.visibility = false;
+                Shield.visibility = false;
+                MaxShield.visibility = false;
+                ShieldRegen.visibility = false;
+                Mana.visibility = false;
+                MaxMana.visibility = false;
+                ManaRegen.visibility = false;
+                Stealthiness.visibility = false;
+                MaxStealthiness.visibility = false;
+                StealthRegen.visibility = false;
+                Atk.visibility = false;
+                Mp.visibility = false;
+                Def.visibility = false;
+                MR.visibility = false;
+                Speed.visibility = false;
+                Calculation.visibility = false;
+
+            } else if (GetStealthiness () < 0) {
+                if (GetStealthiness () < -GetCalculation ()) {
+                    Id.visibility = true;
+                    Name.visibility = true;
+                    Position.visibility = true;
+                    Hp.visibility = true;
+                    MaxHp.visibility = true;
+                    HpRegen.visibility = true;
+                    Shield.visibility = true;
+                    MaxShield.visibility = true;
+                    ShieldRegen.visibility = true;
+                    Mana.visibility = true;
+                    MaxMana.visibility = true;
+                    ManaRegen.visibility = true;
+                    Stealthiness.visibility = true;
+                    MaxStealthiness.visibility = true;
+                    StealthRegen.visibility = true;
+                    Atk.visibility = true;
+                    Mp.visibility = true;
+                    Def.visibility = true;
+                    MR.visibility = true;
+                    Speed.visibility = true;
+                    Calculation.visibility = true;
+                } else {
+                    Id.visibility = true;
+                    Name.visibility = true;
+                    Position.visibility = true;
+                    Hp.visibility = false;
+                    MaxHp.visibility = false;
+                    HpRegen.visibility = false;
+                    Shield.visibility = false;
+                    MaxShield.visibility = false;
+                    ShieldRegen.visibility = false;
+                    Mana.visibility = false;
+                    MaxMana.visibility = false;
+                    ManaRegen.visibility = false;
+                    Stealthiness.visibility = false;
+                    MaxStealthiness.visibility = false;
+                    StealthRegen.visibility = false;
+                    Atk.visibility = false;
+                    Mp.visibility = false;
+                    Def.visibility = false;
+                    MR.visibility = false;
+                    Speed.visibility = false;
+                    Calculation.visibility = false;
+                }
+            }
+        }
+
+        public void SetPosition(int x, int y){
+            if(x >= 0 && x < Board.BOARDSIZE && y >= 0 && y < Board.BOARDSIZE){
+                Position.x = x;
+                Position.y = y;
+            } else{
+                Debug.LogAssertion("Invalid input");
+            }
+        }
+
+        public void SetHp (int value) {
+            if (value >= GetMaxHp ()) {
+                Hp.baseVal = GetMaxHp ();
+            } else if (value <= 0) {
+                Hp.baseVal = 0;
+            } else {
+                Hp.baseVal = value;
+            }
+        }
+
+        public void SetShield (int value) {
+            if (value >= GetMaxShield ()) {
+                Shield.baseVal = GetMaxShield ();
+            } else if (value <= 0) {
+                Shield.baseVal = 0;
+            } else {
+                Shield.baseVal = value;
+            }
+        }
+        public void SetMana (int value) {
+            if (value >= GetMaxMana ()) {
+                Shield.baseVal = GetMaxMana ();
+            } else if (value <= 0) {
+                Mana.baseVal = 0;
+            } else {
+                Mana.baseVal = value;
+            }
         }
 
         // シリアライズ可能なClientUnit型を生成して返す
@@ -228,7 +340,7 @@ namespace StealthBoardStrategy.Server.DataBase {
                 }
                 reader.Close ();
             } catch {
-                Console.WriteLine ("Unit.cs初期化エラー");
+                Debug.LogAssertion("Unit.cs初期化エラー");
             }
         }
 

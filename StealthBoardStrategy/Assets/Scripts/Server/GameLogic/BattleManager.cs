@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 using StealthBoardStrategy.Frontend.Client;
@@ -117,12 +118,11 @@ namespace StealthBoardStrategy.Server.GameLogic {
         // スキルの実装
         //
         private void Move (Unit invoker, (int x, int y) position) {
-            float squareddistanse = (invoker.Position.x - position.x) * (invoker.Position.x - position.x) + (invoker.Position.y - position.y) * (invoker.Position.y - position.y);
-            if (invoker.GetSpeed () * invoker.GetSpeed () >= squareddistanse) {
-                invoker.Position = (position.x, position.y, invoker.Position.visibility);
-            } else {
-                // 不正な入力を通知
-            }
+            // float squareddistanse;
+            // if (invoker.GetSpeed () * invoker.GetSpeed () >= squareddistanse) {
+            // } else {
+            //     // 不正な入力を通知
+            // }
         }
         private void Attack () {
 
