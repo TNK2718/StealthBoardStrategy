@@ -138,6 +138,8 @@ namespace StealthBoardStrategy.Server.GameLogic {
                     Debug.LogAssertion("IndexOutofRange");
                 }
             }
+            // クライアントと同期
+            SyncBoardToClients();
         }
         private void EndPhase () {
             if (!PhotonNetwork.IsMasterClient) return;
