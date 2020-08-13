@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
+using StealthBoardStrategy.Frontend.Events;
 using StealthBoardStrategy.Server.DataBase;
 using StealthBoardStrategy.Server.GameLogic;
 using UnityEngine;
@@ -22,23 +23,36 @@ namespace StealthBoardStrategy.Frontend.Client {
         private List<ClientUnit> UnitList2;
 
         // ボードとキャラを同期
-        // サーバー側からRPCする
         [PunRPC]
         public void SyncBoard (string msg, string boardJson, string[] unitListJson1, string[] unitListJson2, PhotonMessageInfo info) {
             try {
                 Board board = JsonUtility.FromJson<Board> (boardJson);
                 Board = board;
-                UnitList1.Clear();
+                UnitList1.Clear ();
                 for (int i = 0; i < unitListJson1.Length; i++) {
-                    UnitList1.Add(JsonUtility.FromJson<ClientUnit>(unitListJson1[i]));
+                    UnitList1.Add (JsonUtility.FromJson<ClientUnit> (unitListJson1[i]));
                 }
-                UnitList2.Clear();
+                UnitList2.Clear ();
                 for (int i = 0; i < unitListJson2.Length; i++) {
-                    UnitList2.Add(JsonUtility.FromJson<ClientUnit>(unitListJson2[i]));
+                    UnitList2.Add (JsonUtility.FromJson<ClientUnit> (unitListJson2[i]));
                 }
-            }catch{
-                Debug.Log("SyncBoardError");
+            } catch {
+                Debug.Log ("SyncBoardError");
             }
+        }
+
+        // サーバーからEventを受け取って処理
+        [PunRPC]
+        public void ReceiveEvent (string msg, GameEventToClient gameEventToClient) {
+            if (gameEventToClient.GetType () == typeof (ActionEventToClient)) {
+                // なんか処理
+
+            } else {
+
+            }
+            // 処理が終わったことを通知
+            object[] args = new object[]{"SendEventToMaster", gameEventToClient};
+            Master.GetComponent<PhotonView> ().RPC ("SendEventToMaster", RpcTarget.MasterClient, args);
         }
 
         private void Awake () {

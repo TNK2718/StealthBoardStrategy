@@ -33,7 +33,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
 
         // クライアントからマスターへの送信
         [PunRPC]
-        public void SendEventToMaster (GameEvent gameEvent) {
+        public void SendEventToMaster (string msg, GameEvent gameEvent) {
             if (!PhotonNetwork.IsMasterClient) return;
             if (gameEvent.GetType () == typeof (ActionEvent)) {
                 ActionPhase ((ActionEvent) gameEvent);
@@ -94,21 +94,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
 
             }
         }
-        public void BattleLoop () {
-            if (!PhotonNetwork.IsMasterClient) return;
-            switch (GameState) {
-                case GameState.Matching:
-                    break;
-                case GameState.WaitingForInput:
-                    break;
-                case GameState.TurnStart:
-                    break;
-                case GameState.TurnEnd:
-                    break;
-                default:
-                    break;
-            }
-        }
+
         private void TurnStart () {
             if (!PhotonNetwork.IsMasterClient) return;
         }
@@ -132,6 +118,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
                         case SkillType.Attack:
                             break;
                         default:
+                            Debug.Log("No skill corresponds");
                             break;
                     }
                 } catch {
