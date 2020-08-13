@@ -46,7 +46,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
             if (gameEvent.GetType () == typeof (ActionEvent)) {
                 ActionPhase ((ActionEvent) gameEvent);
             } else if (gameEvent.GetType () == typeof (ReadyEvent)) {
-
+                RespondToReadyEvent();
             } else {
 
             }
@@ -113,7 +113,9 @@ namespace StealthBoardStrategy.Server.GameLogic {
         private void TurnStart () {
             if (!PhotonNetwork.IsMasterClient) return;
             RemainingTime = SELECTING_TIME;
-
+            
+            // 入力を受付
+            GameState = GameState.WaitingForInput;
         }
         // クライアントから送られてきたActionEventを受け取って処理
         // TODO: プレイヤーの識別, 認証
@@ -144,6 +146,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
             // クライアントと同期
             SyncBoardToClients ();
         }
+
         // ReadyEventに対する対応
         private void RespondToReadyEvent () {
             if (!PhotonNetwork.IsMasterClient) return;
@@ -152,9 +155,10 @@ namespace StealthBoardStrategy.Server.GameLogic {
             } else if(GameState == GameState.TurnStart){
 
             } else if(GameState == GameState.TurnEnd){
-
+                // 次のターンへ移行
+                PrePhase();
             }else{
-                
+
             }
         }
         private void EndPhase () {
