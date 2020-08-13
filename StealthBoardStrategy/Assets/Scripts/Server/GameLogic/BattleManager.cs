@@ -11,9 +11,10 @@ using UnityEngine;
 namespace StealthBoardStrategy.Server.GameLogic {
     [RequireComponent (typeof (PhotonView))]
     public class BattleManager : MonoBehaviourPunCallbacks {
+        const float SELECTING_TIME = 60;
         private int TurnProcessed;
-        private float RemainingTime;
-        private Players Turn;
+        private float RemainingTime = SELECTING_TIME;
+        private Players Turn = Players.Player1;
         private GameState GameState;
         private List<Unit> UnitList1;
         private List<Unit> UnitList2;
@@ -31,12 +32,21 @@ namespace StealthBoardStrategy.Server.GameLogic {
             SyncBoardToClients ();
         }
 
+        private void FixedUpdate () {
+            if (GameState == GameState.WaitingForInput) RemainingTime -= Time.fixedDeltaTime;
+            if (RemainingTime <= 0) {
+                EndPhase ();
+            }
+        }
+
         // クライアントからマスターへの送信
         [PunRPC]
         public void SendEventToMaster (string msg, GameEvent gameEvent) {
             if (!PhotonNetwork.IsMasterClient) return;
             if (gameEvent.GetType () == typeof (ActionEvent)) {
                 ActionPhase ((ActionEvent) gameEvent);
+            } else if (gameEvent.GetType () == typeof (ReadyEvent)) {
+
             } else {
 
             }
@@ -95,11 +105,15 @@ namespace StealthBoardStrategy.Server.GameLogic {
             }
         }
 
-        private void TurnStart () {
-            if (!PhotonNetwork.IsMasterClient) return;
-        }
+        // ターン開始前の処理
         private void PrePhase () {
             if (!PhotonNetwork.IsMasterClient) return;
+        }
+        // ターン開始
+        private void TurnStart () {
+            if (!PhotonNetwork.IsMasterClient) return;
+            RemainingTime = SELECTING_TIME;
+
         }
         // クライアントから送られてきたActionEventを受け取って処理
         // TODO: プレイヤーの識別, 認証
@@ -107,10 +121,12 @@ namespace StealthBoardStrategy.Server.GameLogic {
             if (!PhotonNetwork.IsMasterClient) return;
             if (!(GameState == GameState.WaitingForInput)) return;
             if (actionEvent.Sender != Turn) return;
+            if(GetUnitList (actionEvent.Sender) [actionEvent.Invoker].ActionPoint <= 0) return;
 
             GameState = GameState.AccepetedInput;
             if (actionEvent.ActionNo == 0) {
                 // 移動
+                Move(GetUnitList (actionEvent.Sender) [actionEvent.Invoker], (actionEvent.TargetPositionX, actionEvent.TargetPositionY));
             } else {
                 // 番号に対応するスキルを発動
                 try {
@@ -118,21 +134,40 @@ namespace StealthBoardStrategy.Server.GameLogic {
                         case SkillType.Attack:
                             break;
                         default:
-                            Debug.Log("No skill corresponds");
+                            Debug.Log ("No skill corresponds");
                             break;
                     }
                 } catch {
-                    Debug.LogAssertion("IndexOutofRange");
+                    Debug.LogAssertion ("IndexOutofRange");
                 }
             }
             // クライアントと同期
-            SyncBoardToClients();
+            SyncBoardToClients ();
+        }
+        // ReadyEventに対する対応
+        private void RespondToReadyEvent () {
+            if (!PhotonNetwork.IsMasterClient) return;
+            if (GameState == GameState.AccepetedInput) {
+                GameState = GameState.WaitingForInput;
+            } else if(GameState == GameState.TurnStart){
+
+            } else if(GameState == GameState.TurnEnd){
+
+            }else{
+                
+            }
         }
         private void EndPhase () {
             if (!PhotonNetwork.IsMasterClient) return;
+            GameState = GameState.TurnEnd;
         }
-        public void TurnEnd () {
+        private void TurnEnd () {
             if (!PhotonNetwork.IsMasterClient) return;
+            if (Turn == Players.Player1) {
+                Turn = Players.Player2;
+            } else if (Turn == Players.Player2) {
+                Turn = Players.Player1;
+            }
         }
 
         //

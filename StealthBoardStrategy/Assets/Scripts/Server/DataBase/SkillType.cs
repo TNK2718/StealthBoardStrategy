@@ -1,5 +1,5 @@
 namespace StealthBoardStrategy.Server.DataBase{
     public enum SkillType{
-        None, Move, Attack, AttackMove, Sonar, Rune, Summon, Sneak, Dot, AttackDot, TerrainChange, Building, Decoy, DecoyRune, DecoyEffect, AttackSelectTime
+        None, Move, Attack, AoEAttack, Sonar, Rune, Summon, Sneak, TerrainChange, TerrainChangeAoEAttack, Building, Decoy, DecoyRune, DecoyEffect,
     }
 }

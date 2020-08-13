@@ -18,6 +18,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         [SerializeField]
         private GameObject Master;
 
+        private Players Turn;
         private Board Board;
         private List<ClientUnit> UnitList1;
         private List<ClientUnit> UnitList2;
@@ -45,7 +46,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         [PunRPC]
         public void ReceiveEvent (string msg, GameEventToClient gameEventToClient) {
             if (gameEventToClient.GetType () == typeof (ActionEventToClient)) {
-                // なんか処理
+                // エフェクトとか
 
             } else {
 
