@@ -35,9 +35,9 @@ namespace StealthBoardStrategy.Server.GameLogic {
         [PunRPC]
         public void SendEventToMaster (GameEvent gameEvent) {
             if (!PhotonNetwork.IsMasterClient) return;
-            if(gameEvent.GetType() == typeof(ActionEvent)){
-
-            } else{
+            if (gameEvent.GetType () == typeof (ActionEvent)) {
+                ActionPhase ((ActionEvent) gameEvent);
+            } else {
 
             }
         }
@@ -116,9 +116,28 @@ namespace StealthBoardStrategy.Server.GameLogic {
             if (!PhotonNetwork.IsMasterClient) return;
         }
         // クライアントから送られてきたActionEventを受け取って処理
+        // TODO: プレイヤーの識別, 認証
         private void ActionPhase (ActionEvent actionEvent) {
             if (!PhotonNetwork.IsMasterClient) return;
-            // TODO: プレイヤーの識別, 認証
+            if (!(GameState == GameState.WaitingForInput)) return;
+            if (actionEvent.Sender != Turn) return;
+
+            GameState = GameState.AccepetedInput;
+            if (actionEvent.ActionNo == 0) {
+                // 移動
+            } else {
+                // 番号に対応するスキルを発動
+                try {
+                    switch (GetUnitList (actionEvent.Sender) [actionEvent.Invoker].SkillList[actionEvent.ActionNo].SkillType) {
+                        case SkillType.Attack:
+                            break;
+                        default:
+                            break;
+                    }
+                } catch {
+                    Debug.LogAssertion("IndexOutofRange");
+                }
+            }
         }
         private void EndPhase () {
             if (!PhotonNetwork.IsMasterClient) return;
@@ -139,6 +158,16 @@ namespace StealthBoardStrategy.Server.GameLogic {
         }
         private void Attack () {
 
+        }
+
+        private List<Unit> GetUnitList (Players player) {
+            if (player == Players.Player1) {
+                return UnitList1;
+            } else if (player == Players.Player2) {
+                return UnitList2;
+            } else {
+                return null;
+            }
         }
     }
 }
