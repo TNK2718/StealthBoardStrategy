@@ -8,6 +8,12 @@ namespace StealthBoardStrategy.Server.GameLogic
         public BuildingType BuildingType;
         public Players Owner;
 
+        public GroundTile(){
+            Hp = 0;
+            BuildingType = BuildingType.None;
+            Owner = Players.None;
+        }
+
         public void SetHp(int value){
             if(value >= 0){
                 Hp = value;

@@ -8,6 +8,5 @@ namespace StealthBoardStrategy.Server.Events
     public abstract class GameEvent
     {
         public Players Sender;
-        public GameEventType gameEventType;
     }
 }

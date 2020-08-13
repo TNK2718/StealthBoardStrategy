@@ -14,6 +14,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
         private int TurnProcessed;
         private float RemainingTime;
         private Players Turn;
+        private GameState GameState;
         private List<Unit> UnitList1;
         private List<Unit> UnitList2;
         private Board Board;
@@ -22,20 +23,28 @@ namespace StealthBoardStrategy.Server.GameLogic {
         public GameObject GuestPlayer;
 
         private void Start () {
-
+            if (!PhotonNetwork.IsMasterClient) return;
+            Board = new Board ();
             // test
             UnitList1 = new List<Unit> { new Unit (0, Players.Player1, 0, 0, Players.Player1) };
             UnitList2 = new List<Unit> { new Unit (0, Players.Player2, 0, 0, Players.Player2) };
-            SyncBoard ();
+            SyncBoardToClients ();
         }
 
+        // クライアントからマスターへの送信
         [PunRPC]
-        public void SendActionMessage () {
+        public void SendEventToMaster (GameEvent gameEvent) {
+            if (!PhotonNetwork.IsMasterClient) return;
+            if(gameEvent.GetType() == typeof(ActionEvent)){
 
+            } else{
+
+            }
         }
 
         // クライアント側にボードを送信
-        public void SyncBoard () {
+        public void SyncBoardToClients () {
+            if (!PhotonNetwork.IsMasterClient) return;
             try {
                 string boardJson = JsonUtility.ToJson (Board);
                 ClientUnit[] unitList11 = new ClientUnit[UnitList1.Count];
@@ -87,9 +96,21 @@ namespace StealthBoardStrategy.Server.GameLogic {
         }
         public void BattleLoop () {
             if (!PhotonNetwork.IsMasterClient) return;
+            switch (GameState) {
+                case GameState.Matching:
+                    break;
+                case GameState.WaitingForInput:
+                    break;
+                case GameState.TurnStart:
+                    break;
+                case GameState.TurnEnd:
+                    break;
+                default:
+                    break;
+            }
         }
         private void TurnStart () {
-
+            if (!PhotonNetwork.IsMasterClient) return;
         }
         private void PrePhase () {
             if (!PhotonNetwork.IsMasterClient) return;
@@ -98,14 +119,6 @@ namespace StealthBoardStrategy.Server.GameLogic {
         private void ActionPhase (ActionEvent actionEvent) {
             if (!PhotonNetwork.IsMasterClient) return;
             // TODO: プレイヤーの識別, 認証
-            /*switch (UnitList[actionEvent.Invoker].SkillList[actionEvent.ActionNo].SkillType) {
-                case SkillType.Move:
-                    break;
-                case SkillType.Attack:
-                    break;
-                default:
-                    break;
-            }*/
         }
         private void EndPhase () {
             if (!PhotonNetwork.IsMasterClient) return;

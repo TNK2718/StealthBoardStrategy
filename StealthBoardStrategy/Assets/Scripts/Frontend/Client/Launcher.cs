@@ -3,6 +3,7 @@ using Photon.Realtime;
 using UnityEngine;
 
 namespace StealthBoardStrategy.Frontend.Client {
+    // Launcher.
     public class Launcher : MonoBehaviourPunCallbacks {
         string gameVersion = "1";
         bool IsConnecting;
