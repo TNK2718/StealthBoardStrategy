@@ -108,6 +108,8 @@ namespace StealthBoardStrategy.Server.GameLogic {
         // ターン開始前の処理
         private void PrePhase () {
             if (!PhotonNetwork.IsMasterClient) return;
+            GameState = GameState.TurnStart;
+            // 処理
         }
         // ターン開始
         private void TurnStart () {
@@ -153,18 +155,20 @@ namespace StealthBoardStrategy.Server.GameLogic {
             if (GameState == GameState.AccepetedInput) {
                 GameState = GameState.WaitingForInput;
             } else if(GameState == GameState.TurnStart){
-
+                TurnStart();
             } else if(GameState == GameState.TurnEnd){
                 // 次のターンへ移行
-                PrePhase();
+                TurnEnd();
             }else{
 
             }
         }
+        // ターン終了時の処理
         private void EndPhase () {
             if (!PhotonNetwork.IsMasterClient) return;
             GameState = GameState.TurnEnd;
         }
+        // ターン終了
         private void TurnEnd () {
             if (!PhotonNetwork.IsMasterClient) return;
             if (Turn == Players.Player1) {
@@ -172,6 +176,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
             } else if (Turn == Players.Player2) {
                 Turn = Players.Player1;
             }
+            PrePhase();
         }
 
         //

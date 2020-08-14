@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
 using StealthBoardStrategy.Frontend.Events;
+using StealthBoardStrategy.Server.Events;
 using StealthBoardStrategy.Server.DataBase;
 using StealthBoardStrategy.Server.GameLogic;
 using UnityEngine;
@@ -48,11 +49,13 @@ namespace StealthBoardStrategy.Frontend.Client {
             if (gameEventToClient.GetType () == typeof (ActionEventToClient)) {
                 // エフェクトとか
 
-            } else {
-
+            } else if (gameEventToClient.GetType() == typeof(TurnStartEventToClient)) { 
+                // エフェクトとか
+            } else if(gameEventToClient.GetType() == typeof(TurnEndEventToClient)){
+                // エフェクトとか
             }
             // 処理が終わったことを通知
-            object[] args = new object[]{"SendEventToMaster", gameEventToClient};
+            object[] args = new object[] { "SendEventToMaster", new ReadyEvent()};
             Master.GetComponent<PhotonView> ().RPC ("SendEventToMaster", RpcTarget.MasterClient, args);
         }
 

@@ -38,5 +38,6 @@ MonoBehaviour:
   - SyncGame
   - SyncBoard
   - SendEventToMaster
+  - ReceiveEvent
   DisableAutoOpenWizard: 1
   ShowSettings: 0
