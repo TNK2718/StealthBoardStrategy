@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 using StealthBoardStrategy.Frontend.Client;
+using StealthBoardStrategy.Frontend.Events;
 using StealthBoardStrategy.Server.DataBase;
 using StealthBoardStrategy.Server.Events;
 using StealthBoardStrategy.Server.GameLogic;
@@ -24,18 +25,26 @@ namespace StealthBoardStrategy.Server.GameLogic {
         public GameObject GuestPlayer;
 
         private void Start () {
+
+            // ここからはMasterClientのみ
             if (!PhotonNetwork.IsMasterClient) return;
             Board = new Board ();
-            // test
+            // プレイヤーユニットを生成
             UnitList1 = new List<Unit> { new Unit (0, Players.Player1, 0, 0, Players.Player1) };
             UnitList2 = new List<Unit> { new Unit (0, Players.Player2, 0, 0, Players.Player2) };
-            SyncBoardToClients ();
+            GameState = GameState.Matching;
         }
 
         private void FixedUpdate () {
-            if (GameState == GameState.WaitingForInput) RemainingTime -= Time.fixedDeltaTime;
-            if (RemainingTime <= 0) {
-                EndPhase ();
+            if (GameState == GameState.WaitingForInput) {
+                RemainingTime -= Time.fixedDeltaTime;
+                if (RemainingTime <= 0) {
+                    EndPhase ();
+                }
+            } else if (GameState == GameState.Matching) {
+                if (PhotonNetwork.CurrentRoom.PlayerCount == 2) {
+                    PrePhase ();
+                }
             }
         }
 
@@ -46,7 +55,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
             if (gameEvent.GetType () == typeof (ActionEvent)) {
                 ActionPhase ((ActionEvent) gameEvent);
             } else if (gameEvent.GetType () == typeof (ReadyEvent)) {
-                RespondToReadyEvent();
+                RespondToReadyEvent ();
             } else {
 
             }
@@ -110,12 +119,18 @@ namespace StealthBoardStrategy.Server.GameLogic {
             if (!PhotonNetwork.IsMasterClient) return;
             GameState = GameState.TurnStart;
             // 処理
+            // イベント送信&同期
+            object[] args1 = new object[] { "TrunStartEventToClient", new TurnStartEventToClient () };
+            object[] args2 = new object[] { "TrunStartEventToClient", new TurnStartEventToClient () };
+            MasterPlayer.GetComponent<PhotonView> ().RPC ("RecieveEvent", RpcTarget.AllViaServer, args1);
+            GuestPlayer.GetComponent<PhotonView> ().RPC ("RecieveEvent", RpcTarget.AllViaServer, args2);
+            SyncBoardToClients ();
         }
         // ターン開始
         private void TurnStart () {
             if (!PhotonNetwork.IsMasterClient) return;
             RemainingTime = SELECTING_TIME;
-            
+
             // 入力を受付
             GameState = GameState.WaitingForInput;
         }
@@ -125,12 +140,12 @@ namespace StealthBoardStrategy.Server.GameLogic {
             if (!PhotonNetwork.IsMasterClient) return;
             if (!(GameState == GameState.WaitingForInput)) return;
             if (actionEvent.Sender != Turn) return;
-            if(GetUnitList (actionEvent.Sender) [actionEvent.Invoker].ActionPoint <= 0) return;
+            if (GetUnitList (actionEvent.Sender) [actionEvent.Invoker].ActionPoint <= 0) return;
 
             GameState = GameState.AccepetedInput;
             if (actionEvent.ActionNo == 0) {
                 // 移動
-                Move(GetUnitList (actionEvent.Sender) [actionEvent.Invoker], (actionEvent.TargetPositionX, actionEvent.TargetPositionY));
+                Move (GetUnitList (actionEvent.Sender) [actionEvent.Invoker], (actionEvent.TargetPositionX, actionEvent.TargetPositionY));
             } else {
                 // 番号に対応するスキルを発動
                 try {
@@ -154,12 +169,12 @@ namespace StealthBoardStrategy.Server.GameLogic {
             if (!PhotonNetwork.IsMasterClient) return;
             if (GameState == GameState.AccepetedInput) {
                 GameState = GameState.WaitingForInput;
-            } else if(GameState == GameState.TurnStart){
-                TurnStart();
-            } else if(GameState == GameState.TurnEnd){
+            } else if (GameState == GameState.TurnStart) {
+                TurnStart ();
+            } else if (GameState == GameState.TurnEnd) {
                 // 次のターンへ移行
-                TurnEnd();
-            }else{
+                TurnEnd ();
+            } else {
 
             }
         }
@@ -167,6 +182,13 @@ namespace StealthBoardStrategy.Server.GameLogic {
         private void EndPhase () {
             if (!PhotonNetwork.IsMasterClient) return;
             GameState = GameState.TurnEnd;
+
+            // イベント送信&同期
+            object[] args1 = new object[] { "TrunEndEventToClient", new TurnEndEventToClient () };
+            object[] args2 = new object[] { "TrunEndEventToClient", new TurnEndEventToClient () };
+            MasterPlayer.GetComponent<PhotonView> ().RPC ("RecieveEvent", RpcTarget.AllViaServer, args1);
+            GuestPlayer.GetComponent<PhotonView> ().RPC ("RecieveEvent", RpcTarget.AllViaServer, args2);
+            SyncBoardToClients ();
         }
         // ターン終了
         private void TurnEnd () {
@@ -176,7 +198,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
             } else if (Turn == Players.Player2) {
                 Turn = Players.Player1;
             }
-            PrePhase();
+            PrePhase ();
         }
 
         //

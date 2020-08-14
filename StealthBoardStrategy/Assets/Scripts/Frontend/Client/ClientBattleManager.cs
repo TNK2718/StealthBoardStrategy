@@ -16,7 +16,6 @@ namespace StealthBoardStrategy.Frontend.Client {
     public class ClientBattleManager : MonoBehaviourPun {
         public static GameObject LocalPlayerInstance;
         public const int MaxUnits = 3;
-        [SerializeField]
         private GameObject Master;
 
         private Players Turn;
@@ -50,6 +49,12 @@ namespace StealthBoardStrategy.Frontend.Client {
                 // エフェクトとか
 
             } else if (gameEventToClient.GetType() == typeof(TurnStartEventToClient)) { 
+                try{
+                    Debug.Log(UnitList1[0].Hp);
+                    Debug.Log(UnitList2[0].Hp);
+                } catch{
+                    Debug.LogAssertion("失敗-!!wwwwww");
+                }
                 // エフェクトとか
             } else if(gameEventToClient.GetType() == typeof(TurnEndEventToClient)){
                 // エフェクトとか
@@ -60,6 +65,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         }
 
         private void Awake () {
+            Master = GameObject.Find("Master");
             BattleManager battleManager = Master.GetComponent<BattleManager> ();
             if (photonView.IsMine) {
                 LocalPlayerInstance = this.gameObject;
