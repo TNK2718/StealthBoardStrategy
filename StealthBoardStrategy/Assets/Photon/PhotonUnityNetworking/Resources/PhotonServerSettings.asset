@@ -39,5 +39,6 @@ MonoBehaviour:
   - SyncBoard
   - SendEventToMaster
   - ReceiveEvent
+  - RecieveEvent
   DisableAutoOpenWizard: 1
   ShowSettings: 0

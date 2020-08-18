@@ -15,8 +15,8 @@ namespace StealthBoardStrategy.Server.GameLogic {
         const float SELECTING_TIME = 60;
         private int TurnProcessed;
         private float RemainingTime = SELECTING_TIME;
-        private Players Turn = Players.Player1;
-        private GameState GameState;
+        private Players Turn;
+        private GameState GameState = GameState.None;
         private List<Unit> UnitList1;
         private List<Unit> UnitList2;
         private Board Board;
@@ -25,7 +25,6 @@ namespace StealthBoardStrategy.Server.GameLogic {
         public GameObject GuestPlayer;
 
         private void Start () {
-
             // ここからはMasterClientのみ
             if (!PhotonNetwork.IsMasterClient) return;
             Board = new Board ();
@@ -33,16 +32,18 @@ namespace StealthBoardStrategy.Server.GameLogic {
             UnitList1 = new List<Unit> { new Unit (0, Players.Player1, 0, 0, Players.Player1) };
             UnitList2 = new List<Unit> { new Unit (0, Players.Player2, 0, 0, Players.Player2) };
             GameState = GameState.Matching;
+            Turn = Players.Player1;
         }
 
         private void FixedUpdate () {
+            if (PhotonNetwork.IsMasterClient) Debug.Log (GameState);
             if (GameState == GameState.WaitingForInput) {
                 RemainingTime -= Time.fixedDeltaTime;
                 if (RemainingTime <= 0) {
                     EndPhase ();
                 }
             } else if (GameState == GameState.Matching) {
-                if (PhotonNetwork.CurrentRoom.PlayerCount == 2) {
+                if (MasterPlayer != null && GuestPlayer != null) {
                     PrePhase ();
                 }
             }
@@ -50,7 +51,8 @@ namespace StealthBoardStrategy.Server.GameLogic {
 
         // クライアントからマスターへの送信
         [PunRPC]
-        public void SendEventToMaster (string msg, GameEvent gameEvent) {
+        public void SendEventToMaster (string msg, string gameEventJson) {
+            GameEvent gameEvent = JsonUtility.FromJson<GameEvent>(gameEventJson);
             if (!PhotonNetwork.IsMasterClient) return;
             if (gameEvent.GetType () == typeof (ActionEvent)) {
                 ActionPhase ((ActionEvent) gameEvent);
@@ -120,8 +122,8 @@ namespace StealthBoardStrategy.Server.GameLogic {
             GameState = GameState.TurnStart;
             // 処理
             // イベント送信&同期
-            object[] args1 = new object[] { "TrunStartEventToClient", new TurnStartEventToClient () };
-            object[] args2 = new object[] { "TrunStartEventToClient", new TurnStartEventToClient () };
+            object[] args1 = new object[] { "TrunStartEventToClient", JsonUtility.ToJson(new TurnStartEventToClient ()) };
+            object[] args2 = new object[] { "TrunStartEventToClient", JsonUtility.ToJson(new TurnStartEventToClient ()) };
             MasterPlayer.GetComponent<PhotonView> ().RPC ("RecieveEvent", RpcTarget.AllViaServer, args1);
             GuestPlayer.GetComponent<PhotonView> ().RPC ("RecieveEvent", RpcTarget.AllViaServer, args2);
             SyncBoardToClients ();
@@ -184,8 +186,8 @@ namespace StealthBoardStrategy.Server.GameLogic {
             GameState = GameState.TurnEnd;
 
             // イベント送信&同期
-            object[] args1 = new object[] { "TrunEndEventToClient", new TurnEndEventToClient () };
-            object[] args2 = new object[] { "TrunEndEventToClient", new TurnEndEventToClient () };
+            object[] args1 = new object[] { "TrunEndEventToClient", JsonUtility.ToJson (new TurnEndEventToClient ()) };
+            object[] args2 = new object[] { "TrunEndEventToClient", JsonUtility.ToJson (new TurnEndEventToClient ()) };
             MasterPlayer.GetComponent<PhotonView> ().RPC ("RecieveEvent", RpcTarget.AllViaServer, args1);
             GuestPlayer.GetComponent<PhotonView> ().RPC ("RecieveEvent", RpcTarget.AllViaServer, args2);
             SyncBoardToClients ();

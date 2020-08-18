@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
 using StealthBoardStrategy.Frontend.Events;
-using StealthBoardStrategy.Server.Events;
 using StealthBoardStrategy.Server.DataBase;
+using StealthBoardStrategy.Server.Events;
 using StealthBoardStrategy.Server.GameLogic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -13,7 +13,7 @@ using UnityEngine.SceneManagement;
 namespace StealthBoardStrategy.Frontend.Client {
     // クライアント上でゲームの情報を管理する
     // プレイヤーキャラクターとしてGameManagerから生成される
-    public class ClientBattleManager : MonoBehaviourPun {
+    public class ClientBattleManager : MonoBehaviourPunCallbacks {
         public static GameObject LocalPlayerInstance;
         public const int MaxUnits = 3;
         private GameObject Master;
@@ -44,44 +44,57 @@ namespace StealthBoardStrategy.Frontend.Client {
 
         // サーバーからEventを受け取って処理
         [PunRPC]
-        public void ReceiveEvent (string msg, GameEventToClient gameEventToClient) {
+        public void RecieveEvent (string msg, string gameEventToClientJson) {
+            GameEventToClient gameEventToClient = JsonUtility.FromJson<GameEventToClient>(gameEventToClientJson);
+            Debug.Log ("otintin");
             if (gameEventToClient.GetType () == typeof (ActionEventToClient)) {
                 // エフェクトとか
 
-            } else if (gameEventToClient.GetType() == typeof(TurnStartEventToClient)) { 
-                try{
-                    Debug.Log(UnitList1[0].Hp);
-                    Debug.Log(UnitList2[0].Hp);
-                } catch{
-                    Debug.LogAssertion("失敗-!!wwwwww");
+            } else if (gameEventToClient.GetType () == typeof (TurnStartEventToClient)) {
+                try {
+                    Debug.Log (UnitList1[0].Hp);
+                    Debug.Log (UnitList2[0].Hp);
+                } catch {
+                    Debug.LogAssertion ("失敗-!!wwwwww");
                 }
                 // エフェクトとか
-            } else if(gameEventToClient.GetType() == typeof(TurnEndEventToClient)){
+            } else if (gameEventToClient.GetType () == typeof (TurnEndEventToClient)) {
                 // エフェクトとか
             }
             // 処理が終わったことを通知
-            object[] args = new object[] { "SendEventToMaster", new ReadyEvent()};
+            object[] args = new object[] { "SendEventToMaster", JsonUtility.ToJson(new ReadyEvent ()) };
             Master.GetComponent<PhotonView> ().RPC ("SendEventToMaster", RpcTarget.MasterClient, args);
         }
 
+        // プレイヤー参加時, battlemanagerに登録
+        public override void OnPlayerEnteredRoom(Player newPlayer){
+            RegisterPlayerToBattleManager();
+        }
+
         private void Awake () {
-            Master = GameObject.Find("Master");
+            Board = new Board ();
+            UnitList1 = new List<ClientUnit> (MaxUnits);
+            UnitList2 = new List<ClientUnit> (MaxUnits);
+        }
+
+        private void Start () {
+            RegisterPlayerToBattleManager();
+        }
+
+        private void RegisterPlayerToBattleManager(){
+            Master = GameObject.Find ("Master");
             BattleManager battleManager = Master.GetComponent<BattleManager> ();
-            if (photonView.IsMine) {
+            if (this.photonView.IsMine) {
+                Debug.Log("1");
                 LocalPlayerInstance = this.gameObject;
                 if (PhotonNetwork.IsMasterClient) battleManager.MasterPlayer = this.gameObject; // battleManagerにプレイヤーを登録
                 else battleManager.GuestPlayer = this.gameObject;
             } else {
+                Debug.Log("2");
                 if (PhotonNetwork.IsMasterClient) battleManager.GuestPlayer = this.gameObject;
                 else battleManager.MasterPlayer = this.gameObject;
             }
             DontDestroyOnLoad (this.gameObject);
-        }
-
-        private void Start () {
-            Board = new Board ();
-            UnitList1 = new List<ClientUnit> (MaxUnits);
-            UnitList2 = new List<ClientUnit> (MaxUnits);
         }
     }
 }
