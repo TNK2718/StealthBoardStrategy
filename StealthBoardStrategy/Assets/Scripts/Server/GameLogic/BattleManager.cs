@@ -52,11 +52,12 @@ namespace StealthBoardStrategy.Server.GameLogic {
         // クライアントからマスターへの送信
         [PunRPC]
         public void SendEventToMaster (string msg, string gameEventJson) {
-            GameEvent gameEvent = JsonUtility.FromJson<GameEvent>(gameEventJson);
+            GameEvent gameEvent;
             if (!PhotonNetwork.IsMasterClient) return;
-            if (gameEvent.GetType () == typeof (ActionEvent)) {
+            if (msg == "ActionEvent") {
+                gameEvent = JsonUtility.FromJson<ActionEvent>(gameEventJson);
                 ActionPhase ((ActionEvent) gameEvent);
-            } else if (gameEvent.GetType () == typeof (ReadyEvent)) {
+            } else if (msg == "ReadyEvent") {
                 RespondToReadyEvent ();
             } else {
 

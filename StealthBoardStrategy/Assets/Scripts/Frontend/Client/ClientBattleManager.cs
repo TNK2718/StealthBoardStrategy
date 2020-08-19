@@ -45,12 +45,12 @@ namespace StealthBoardStrategy.Frontend.Client {
         // サーバーからEventを受け取って処理
         [PunRPC]
         public void RecieveEvent (string msg, string gameEventToClientJson) {
-            GameEventToClient gameEventToClient = JsonUtility.FromJson<GameEventToClient> (gameEventToClientJson);
-            Debug.Log ("otintin");
-            if (gameEventToClient.GetType () == typeof (ActionEventToClient)) {
+            GameEventToClient gameEventToClient = null;
+            if (msg == "ActionEventToClient") {
+                gameEventToClient = JsonUtility.FromJson<ActionEventToClient>(gameEventToClientJson);
                 // エフェクトとか
 
-            } else if (gameEventToClient.GetType () == typeof (TurnStartEventToClient)) {
+            } else if (msg == "TurnStartEventToClient") {
                 try {
                     Debug.Log (UnitList1[0].Hp);
                     Debug.Log (UnitList2[0].Hp);
@@ -58,8 +58,10 @@ namespace StealthBoardStrategy.Frontend.Client {
                     Debug.LogAssertion ("失敗-!!wwwwww");
                 }
                 // エフェクトとか
-            } else if (gameEventToClient.GetType () == typeof (TurnEndEventToClient)) {
+            } else if (msg == "TurnEndEventToClient") {
                 // エフェクトとか
+            } else{
+                Debug.LogAssertion("Error");
             }
             // 処理が終わったことを通知
             object[] args = new object[] { "SendEventToMaster", JsonUtility.ToJson (new ReadyEvent ()) };
@@ -73,7 +75,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         }
 
         private void Start () {
-            RegisterPlayerToBattleManager();
+            RegisterPlayerToBattleManager ();
         }
 
         private void RegisterPlayerToBattleManager () {
