@@ -45,7 +45,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         // サーバーからEventを受け取って処理
         [PunRPC]
         public void RecieveEvent (string msg, string gameEventToClientJson) {
-            GameEventToClient gameEventToClient = JsonUtility.FromJson<GameEventToClient>(gameEventToClientJson);
+            GameEventToClient gameEventToClient = JsonUtility.FromJson<GameEventToClient> (gameEventToClientJson);
             Debug.Log ("otintin");
             if (gameEventToClient.GetType () == typeof (ActionEventToClient)) {
                 // エフェクトとか
@@ -62,13 +62,8 @@ namespace StealthBoardStrategy.Frontend.Client {
                 // エフェクトとか
             }
             // 処理が終わったことを通知
-            object[] args = new object[] { "SendEventToMaster", JsonUtility.ToJson(new ReadyEvent ()) };
+            object[] args = new object[] { "SendEventToMaster", JsonUtility.ToJson (new ReadyEvent ()) };
             Master.GetComponent<PhotonView> ().RPC ("SendEventToMaster", RpcTarget.MasterClient, args);
-        }
-
-        // プレイヤー参加時, battlemanagerに登録
-        public override void OnPlayerEnteredRoom(Player newPlayer){
-            RegisterPlayerToBattleManager();
         }
 
         private void Awake () {
@@ -81,16 +76,14 @@ namespace StealthBoardStrategy.Frontend.Client {
             RegisterPlayerToBattleManager();
         }
 
-        private void RegisterPlayerToBattleManager(){
+        private void RegisterPlayerToBattleManager () {
             Master = GameObject.Find ("Master");
             BattleManager battleManager = Master.GetComponent<BattleManager> ();
             if (this.photonView.IsMine) {
-                Debug.Log("1");
                 LocalPlayerInstance = this.gameObject;
                 if (PhotonNetwork.IsMasterClient) battleManager.MasterPlayer = this.gameObject; // battleManagerにプレイヤーを登録
                 else battleManager.GuestPlayer = this.gameObject;
             } else {
-                Debug.Log("2");
                 if (PhotonNetwork.IsMasterClient) battleManager.GuestPlayer = this.gameObject;
                 else battleManager.MasterPlayer = this.gameObject;
             }

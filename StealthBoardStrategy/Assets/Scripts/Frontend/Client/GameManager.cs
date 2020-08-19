@@ -16,7 +16,7 @@ namespace StealthBoardStrategy.Frontend.Client {
 
         public override void OnPlayerEnteredRoom (Photon.Realtime.Player other) {
             Debug.LogFormat ("OnPlayerEnteredRoom() {0}", other.NickName);
-            if (PhotonNetwork.IsMasterClient) {
+            if (PhotonNetwork.IsMasterClient && ClientBattleManager.LocalPlayerInstance == null) {
                 Debug.LogFormat ("OnPlayerEnteredRoom IsMasterClient {0}", PhotonNetwork.IsMasterClient);
                 LoadArena ();
             }
