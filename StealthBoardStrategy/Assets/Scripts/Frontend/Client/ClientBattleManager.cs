@@ -45,18 +45,13 @@ namespace StealthBoardStrategy.Frontend.Client {
         // サーバーからEventを受け取って処理
         [PunRPC]
         public void RecieveEvent (string msg, string gameEventToClientJson) {
+            Debug.Log(msg);
             GameEventToClient gameEventToClient = null;
             if (msg == "ActionEventToClient") {
                 gameEventToClient = JsonUtility.FromJson<ActionEventToClient>(gameEventToClientJson);
                 // エフェクトとか
 
-            } else if (msg == "TurnStartEventToClient") {
-                try {
-                    Debug.Log (UnitList1[0].Hp);
-                    Debug.Log (UnitList2[0].Hp);
-                } catch {
-                    Debug.LogAssertion ("失敗-!!wwwwww");
-                }
+            } else if (msg == "TrunStartEventToClient") {
                 // エフェクトとか
             } else if (msg == "TurnEndEventToClient") {
                 // エフェクトとか
@@ -64,7 +59,7 @@ namespace StealthBoardStrategy.Frontend.Client {
                 Debug.LogAssertion("Error");
             }
             // 処理が終わったことを通知
-            object[] args = new object[] { "SendEventToMaster", JsonUtility.ToJson (new ReadyEvent ()) };
+            object[] args = new object[] { "ReadyEvent", JsonUtility.ToJson (new ReadyEvent ()) };
             Master.GetComponent<PhotonView> ().RPC ("SendEventToMaster", RpcTarget.MasterClient, args);
         }
 
