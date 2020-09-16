@@ -17,6 +17,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         public static GameObject LocalPlayerInstance;
         public const int MaxUnits = 3;
         private GameObject Master;
+        private GameObject CameraObj;
 
         private Players Turn;
         private Board Board;
@@ -45,18 +46,18 @@ namespace StealthBoardStrategy.Frontend.Client {
         // サーバーからEventを受け取って処理
         [PunRPC]
         public void RecieveEvent (string msg, string gameEventToClientJson) {
-            Debug.Log(msg);
+            Debug.Log (msg);
             GameEventToClient gameEventToClient = null;
             if (msg == "ActionEventToClient") {
-                gameEventToClient = JsonUtility.FromJson<ActionEventToClient>(gameEventToClientJson);
+                gameEventToClient = JsonUtility.FromJson<ActionEventToClient> (gameEventToClientJson);
                 // エフェクトとか
 
             } else if (msg == "TrunStartEventToClient") {
                 // エフェクトとか
             } else if (msg == "TurnEndEventToClient") {
                 // エフェクトとか
-            } else{
-                Debug.LogAssertion("Error");
+            } else {
+                Debug.LogAssertion ("Error");
             }
             // 処理が終わったことを通知
             object[] args = new object[] { "ReadyEvent", JsonUtility.ToJson (new ReadyEvent ()) };
@@ -70,9 +71,16 @@ namespace StealthBoardStrategy.Frontend.Client {
         }
 
         private void Start () {
+            // カメラを取得
+            CameraObj = Camera.allCameras[0].gameObject;
             RegisterPlayerToBattleManager ();
         }
 
+        private void FixedUpdate () {
+
+        }
+
+        // 初期化
         private void RegisterPlayerToBattleManager () {
             Master = GameObject.Find ("Master");
             BattleManager battleManager = Master.GetComponent<BattleManager> ();
@@ -85,6 +93,20 @@ namespace StealthBoardStrategy.Frontend.Client {
                 else battleManager.MasterPlayer = this.gameObject;
             }
             DontDestroyOnLoad (this.gameObject);
+        }
+
+        // 入力を処理
+        private void RecieveInput () {
+            Vector3 clickPos;
+            Vector3 position;
+            Vector3 direction;
+            if (Input.GetMouseButtonDown (0)) {
+                clickPos = Input.mousePosition;
+                position = CameraObj.transform.position;
+                direction = Camera.main.ScreenToWorldPoint(clickPos) - CameraObj.transform.position;
+                //Physics.Raycast(position, direction, 100);
+                Debug.DrawRay(position, direction* 100, Color.red, 1);
+            }
         }
     }
 }
