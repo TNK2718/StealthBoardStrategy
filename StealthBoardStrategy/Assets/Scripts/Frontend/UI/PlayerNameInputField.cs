@@ -27,7 +27,7 @@ namespace StealthBoardStrategy.Frontend.UI
 
         public void SetPlayersName(string value){
             if(string.IsNullOrEmpty(value)){
-                Debug.LogError("Player Name is null or empty");
+                Debug.LogWarning("Player Name is null or empty");
                 return;
             }
             PhotonNetwork.NickName = value;

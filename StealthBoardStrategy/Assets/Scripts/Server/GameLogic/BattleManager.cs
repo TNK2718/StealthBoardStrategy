@@ -36,7 +36,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
         }
 
         private void FixedUpdate () {
-            if (PhotonNetwork.IsMasterClient) Debug.Log (GameState);
+            //if (PhotonNetwork.IsMasterClient) Debug.Log (GameState);
             if (GameState == GameState.WaitingForInput) {
                 RemainingTime -= Time.fixedDeltaTime;
                 if (RemainingTime <= 0) {
@@ -182,6 +182,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
             }
         }
         // ターン終了時の処理
+        // dotダメージや建造物の効果などはここで発動する
         private void EndPhase () {
             if (!PhotonNetwork.IsMasterClient) return;
             GameState = GameState.TurnEnd;

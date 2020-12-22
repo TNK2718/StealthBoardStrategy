@@ -9,6 +9,7 @@ using StealthBoardStrategy.Server.Events;
 using StealthBoardStrategy.Server.GameLogic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Tilemaps;
 
 namespace StealthBoardStrategy.Frontend.Client {
     // クライアント上でゲームの情報を管理する
@@ -18,6 +19,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         public const int MaxUnits = 3;
         private GameObject Master;
         private GameObject CameraObj;
+        private Tilemap BoardTileMap;
 
         private Players Turn;
         private Board Board;
@@ -74,10 +76,12 @@ namespace StealthBoardStrategy.Frontend.Client {
             // カメラを取得
             CameraObj = Camera.allCameras[0].gameObject;
             RegisterPlayerToBattleManager ();
+            // Tilemapを取得
+            BoardTileMap = GameObject.Find ("BoardTilemap").GetComponent<Tilemap> ();
         }
 
         private void FixedUpdate () {
-
+            RecieveTileInput ();
         }
 
         // 初期化
@@ -95,18 +99,39 @@ namespace StealthBoardStrategy.Frontend.Client {
             DontDestroyOnLoad (this.gameObject);
         }
 
-        // 入力を処理
-        private void RecieveInput () {
-            Vector3 clickPos;
-            Vector3 position;
-            Vector3 direction;
+        // タイルへのクリック入力を処理
+        private void RecieveTileInput () {
+            if (!photonView.IsMine) return;
             if (Input.GetMouseButtonDown (0)) {
-                clickPos = Input.mousePosition;
-                position = CameraObj.transform.position;
-                direction = Camera.main.ScreenToWorldPoint(clickPos) - CameraObj.transform.position;
-                //Physics.Raycast(position, direction, 100);
-                Debug.DrawRay(position, direction* 100, Color.red, 1);
+                // Vector3でマウス位置座標を取得する
+                var position = Input.mousePosition;
+                // Z軸修正
+                position.z = 10f;
+                // マウス位置座標をスクリーン座標からワールド座標に変換する
+                var screenToWorldPointPosition = Camera.main.ScreenToWorldPoint (position);
+                //tilemapに座標情報を渡す
+                Vector3Int clickPosition = BoardTileMap.WorldToCell (screenToWorldPointPosition);
+                if (BoardTileMap.HasTile (clickPosition) == true) {
+                    Debug.Log (clickPosition);
+                }
             }
+            // カメラを使う方法?
+            // Vector3 clickPos;
+            // Vector3 position;
+            // Vector3 direction;
+            // RaycastHit _hit;
+            // Vector3Int clickIntPos;
+            // if (Input.GetMouseButtonDown (0)) {
+            //     clickPos = Input.mousePosition;
+            //     position = CameraObj.transform.position;
+            //     clickPos.z = 10f;
+            //     direction = (Camera.main.ScreenToWorldPoint(clickPos) - CameraObj.transform.position).normalized;
+            //     Physics.Raycast(position, direction, out _hit, 100, 8, QueryTriggerInteraction.Collide);
+            //     Debug.DrawRay(position, direction);
+            //     // よくわからん
+            //     clickIntPos = BoardTileMap.WorldToCell(_hit.point + direction);
+            //     Debug.Log(clickIntPos);
+            // }
         }
     }
 }
