@@ -17,6 +17,7 @@ namespace StealthBoardStrategy.Frontend.Client {
     public class ClientBattleManager : MonoBehaviourPunCallbacks {
         public static GameObject LocalPlayerInstance;
         public const int MaxUnits = 3;
+
         private GameObject Master;
         private GameObject CameraObj;
         private Tilemap BoardTileMap;
@@ -25,6 +26,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         private Board Board;
         private List<ClientUnit> UnitList1;
         private List<ClientUnit> UnitList2;
+        private ClientGameState GameState;
 
         // ボードとキャラを同期
         [PunRPC]
@@ -55,13 +57,13 @@ namespace StealthBoardStrategy.Frontend.Client {
                 // エフェクトとか
 
             } else if (msg == "TrunStartEventToClient") {
-                // エフェクトとか
+                // エフェクト等の処理が終わるのを待ってサーバーに通知
             } else if (msg == "TurnEndEventToClient") {
                 // エフェクトとか
             } else {
                 Debug.LogAssertion ("Error");
             }
-            // 処理が終わったことを通知
+            // 処理が終わったことを通知(全てReadyEventに統一)
             object[] args = new object[] { "ReadyEvent", JsonUtility.ToJson (new ReadyEvent ()) };
             Master.GetComponent<PhotonView> ().RPC ("SendEventToMaster", RpcTarget.MasterClient, args);
         }
@@ -73,6 +75,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         }
 
         private void Start () {
+            GameState = ClientGameState.Matching;
             // カメラを取得
             CameraObj = Camera.allCameras[0].gameObject;
             RegisterPlayerToBattleManager ();
@@ -109,11 +112,12 @@ namespace StealthBoardStrategy.Frontend.Client {
                 position.z = 10f;
                 // マウス位置座標をスクリーン座標からワールド座標に変換する
                 var screenToWorldPointPosition = Camera.main.ScreenToWorldPoint (position);
-                //tilemapに座標情報を渡す
+                //tilemap座標を得る
                 Vector3Int clickPosition = BoardTileMap.WorldToCell (screenToWorldPointPosition);
                 if (BoardTileMap.HasTile (clickPosition) == true) {
                     Debug.Log (clickPosition);
                 }
+
             }
             // カメラを使う方法?
             // Vector3 clickPos;

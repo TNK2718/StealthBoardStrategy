@@ -4,6 +4,6 @@ namespace StealthBoardStrategy.Server.GameLogic
 {
     public enum GameState
     {
-        None, Matching, WaitingForInput, AccepetedInput, TurnStart, TurnEnd,
+        None, Matching, WaitingForInput, TurnStart, TurnEnd, GameEnd
     }
 }
