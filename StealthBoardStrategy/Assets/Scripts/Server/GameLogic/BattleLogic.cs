@@ -18,6 +18,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
         public Board Board;
 
         public BattleLogic () {
+            TurnProcessed = 0;
             Board = new Board ();
             // プレイヤーユニットを生成
             UnitList1 = new List<Unit> { new Unit (0, Players.Player1, 0, 0, Players.Player1) };

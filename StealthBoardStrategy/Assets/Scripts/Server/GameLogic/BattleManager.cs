@@ -14,7 +14,6 @@ namespace StealthBoardStrategy.Server.GameLogic {
     public class BattleManager : MonoBehaviourPunCallbacks {
         const float SELECTING_TIME = 60;
         private float RemainingTime = SELECTING_TIME;
-        private Players Turn;
         private GameState GameState;
         private BattleLogic BattleLogic;
         private List<ActionEvent> ActionEvents1;
@@ -27,7 +26,6 @@ namespace StealthBoardStrategy.Server.GameLogic {
             // ここからはMasterClientのみ
             if (!PhotonNetwork.IsMasterClient) return;
             GameState = GameState.Matching;
-            Turn = Players.Player1;
         }
 
         private void FixedUpdate () {
@@ -68,33 +66,12 @@ namespace StealthBoardStrategy.Server.GameLogic {
             GuestPlayer.GetComponent<PhotonView> ().RPC ("SyncBoard", RpcTarget.AllViaServer, argsarray[1]);
         }
 
-        // ターン開始前の処理
-        private void PrePhase () {
-            if (!PhotonNetwork.IsMasterClient) return;
-            GameState = GameState.TurnStart;
-            // 処理
-            // イベント送信&同期
-            object[] args1 = new object[] { "TrunStartEventToClient", JsonUtility.ToJson (new TurnStartEventToClient ()) };
-            object[] args2 = new object[] { "TrunStartEventToClient", JsonUtility.ToJson (new TurnStartEventToClient ()) };
-            MasterPlayer.GetComponent<PhotonView> ().RPC ("RecieveEvent", RpcTarget.AllViaServer, args1);
-            GuestPlayer.GetComponent<PhotonView> ().RPC ("RecieveEvent", RpcTarget.AllViaServer, args2);
-            SyncBoardToClients ();
-        }
-        // ターン開始
-        private void TurnStart () {
-            if (!PhotonNetwork.IsMasterClient) return;
-            RemainingTime = SELECTING_TIME;
-
-            // 入力を受付
-            GameState = GameState.WaitingForInput;
-        }
-        // クライアントから送られてきたActionEventを受け取って処理
+        // クライアントから送られてきたActionEventを受け取る
         // TODO: プレイヤーの識別, 認証
         private void RespondToActionEvent (ActionEvent actionEvent) {
             if (!PhotonNetwork.IsMasterClient) return;
             if (!(GameState == GameState.WaitingForInput)) return;
-            if (actionEvent.Sender != Turn) return;
-
+            
             // クライアントと同期
             SyncBoardToClients ();
         }
@@ -114,7 +91,30 @@ namespace StealthBoardStrategy.Server.GameLogic {
 
             }
         }
-        // ターン終了時の処理
+        // ターン開始前の処理
+        private void PrePhase () {
+            if (!PhotonNetwork.IsMasterClient) return;
+            GameState = GameState.TurnStart;
+            // ActionEventsを初期化
+            ActionEvents1.Clear ();
+            ActionEvents2.Clear ();
+            // 処理
+            // イベント送信&同期
+            object[] args1 = new object[] { "TrunStartEventToClient", JsonUtility.ToJson (new TurnStartEventToClient ()) };
+            object[] args2 = new object[] { "TrunStartEventToClient", JsonUtility.ToJson (new TurnStartEventToClient ()) };
+            MasterPlayer.GetComponent<PhotonView> ().RPC ("RecieveEvent", RpcTarget.AllViaServer, args1);
+            GuestPlayer.GetComponent<PhotonView> ().RPC ("RecieveEvent", RpcTarget.AllViaServer, args2);
+            SyncBoardToClients ();
+        }
+        // ターン開始
+        private void TurnStart () {
+            if (!PhotonNetwork.IsMasterClient) return;
+            RemainingTime = SELECTING_TIME;
+
+            // 入力を受付
+            GameState = GameState.WaitingForInput;
+        }
+        // 受け取った入力を処理+結果をクライアントに送信
         // dotダメージや建造物の効果などはEndPhaseで発動する
         private void EndPhase () {
             if (!PhotonNetwork.IsMasterClient) return;
@@ -130,11 +130,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
         // ターン終了
         private void TurnEnd () {
             if (!PhotonNetwork.IsMasterClient) return;
-            if (Turn == Players.Player1) {
-                Turn = Players.Player2;
-            } else if (Turn == Players.Player2) {
-                Turn = Players.Player1;
-            }
+            BattleLogic.TurnProcessed++;
             PrePhase ();
         }
     }
