@@ -74,26 +74,8 @@ namespace StealthBoardStrategy.Server.GameLogic {
             }
             return null;
         }
-        private void ActionPhase (ActionEvent actionEvent) {
-            if (GetUnitList (actionEvent.Sender) [actionEvent.Invoker].ActionPoint <= 0) return;
-
-            if (actionEvent.ActionNo == 0) {
-                // 移動
-                Move (GetUnitList (actionEvent.Sender) [actionEvent.Invoker], (actionEvent.TargetPositionX, actionEvent.TargetPositionY));
-            } else {
-                // 番号に対応するスキルを発動
-                try {
-                    switch (GetUnitList (actionEvent.Sender) [actionEvent.Invoker].SkillList[actionEvent.ActionNo].SkillType) {
-                        case SkillType.Attack:
-                            break;
-                        default:
-                            Debug.Log ("No skill corresponds");
-                            break;
-                    }
-                } catch {
-                    Debug.LogAssertion ("IndexOutofRange");
-                }
-            }
+        private void ActionPhase (ActionEvent actionEvent1, ActionEvent actionEvent2) {
+            // TODO: Spd順に各ユニットの行動をソート
         }
         //
         // スキルの実装

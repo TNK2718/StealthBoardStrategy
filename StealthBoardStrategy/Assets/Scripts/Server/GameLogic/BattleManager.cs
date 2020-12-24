@@ -17,7 +17,8 @@ namespace StealthBoardStrategy.Server.GameLogic {
         private Players Turn;
         private GameState GameState;
         private BattleLogic BattleLogic;
-        private List<ActionEvent> ActionEvents;
+        private List<ActionEvent> ActionEvents1;
+        private List<ActionEvent> ActionEvents2;
 
         public GameObject MasterPlayer;
         public GameObject GuestPlayer;
@@ -30,7 +31,8 @@ namespace StealthBoardStrategy.Server.GameLogic {
         }
 
         private void FixedUpdate () {
-            if (PhotonNetwork.IsMasterClient) Debug.Log (GameState);
+            if (!PhotonNetwork.IsMasterClient) return;
+            Debug.Log (GameState);
             if (GameState == GameState.WaitingForInput) {
                 RemainingTime -= Time.fixedDeltaTime;
                 if (RemainingTime <= 0) {
