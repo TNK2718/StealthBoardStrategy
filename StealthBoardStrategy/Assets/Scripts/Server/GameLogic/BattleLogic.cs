@@ -75,7 +75,8 @@ namespace StealthBoardStrategy.Server.GameLogic {
             }
             return null;
         }
-        private void ActionPhase (ActionEvent actionEvent1, ActionEvent actionEvent2) {
+        // プレイヤーの行動を処理
+        private void ProcessActionEvents (ActionEvent actionEvent1, ActionEvent actionEvent2) {
             // TODO: Spd順に各ユニットの行動をソート
         }
         //

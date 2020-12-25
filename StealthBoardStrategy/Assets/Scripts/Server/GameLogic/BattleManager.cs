@@ -16,8 +16,10 @@ namespace StealthBoardStrategy.Server.GameLogic {
         private float RemainingTime = SELECTING_TIME;
         private GameState GameState;
         private BattleLogic BattleLogic;
-        private List<ActionEvent> ActionEvents1;
-        private List<ActionEvent> ActionEvents2;
+        private List<UnitAction> UnitActions1;
+        private List<UnitAction> UnitActions2;
+        private bool ActionAccepted1;
+        private bool ActionAccepted2;
 
         public GameObject MasterPlayer;
         public GameObject GuestPlayer;
@@ -29,18 +31,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
         }
 
         private void FixedUpdate () {
-            if (!PhotonNetwork.IsMasterClient) return;
-            Debug.Log (GameState);
-            if (GameState == GameState.WaitingForInput) {
-                RemainingTime -= Time.fixedDeltaTime;
-                if (RemainingTime <= 0) {
-                    EndPhase ();
-                }
-            } else if (GameState == GameState.Matching) {
-                if (MasterPlayer != null && GuestPlayer != null) {
-                    PrePhase ();
-                }
-            }
+            SwitchGameState ();
         }
 
         // クライアントからマスターへの送信
@@ -71,9 +62,24 @@ namespace StealthBoardStrategy.Server.GameLogic {
         private void RespondToActionEvent (ActionEvent actionEvent) {
             if (!PhotonNetwork.IsMasterClient) return;
             if (!(GameState == GameState.WaitingForInput)) return;
-            
-            // クライアントと同期
-            SyncBoardToClients ();
+
+            if (actionEvent.Sender == Players.Player1) {
+                UnitActions1.Clear ();
+                for (int i = 0; i < actionEvent.UnitActions.Length; i++) {
+                    UnitActions1[i] = actionEvent.UnitActions[i];
+                }
+                // 入力完了フラグ
+                ActionAccepted1 = true;
+            } else if (actionEvent.Sender == Players.Player2) {
+                UnitActions2.Clear ();
+                for (int i = 0; i < actionEvent.UnitActions.Length; i++) {
+                    UnitActions2[i] = actionEvent.UnitActions[i];
+                }
+                // 入力完了フラグ
+                ActionAccepted2 = true;
+            } else {
+                Debug.LogAssertion ("UnknownSender");
+            }
         }
 
         // ReadyEventに対する対応
@@ -96,8 +102,10 @@ namespace StealthBoardStrategy.Server.GameLogic {
             if (!PhotonNetwork.IsMasterClient) return;
             GameState = GameState.TurnStart;
             // ActionEventsを初期化
-            ActionEvents1.Clear ();
-            ActionEvents2.Clear ();
+            UnitActions1.Clear ();
+            UnitActions2.Clear ();
+            ActionAccepted1 = false;
+            ActionAccepted2 = false;
             // 処理
             // イベント送信&同期
             object[] args1 = new object[] { "TrunStartEventToClient", JsonUtility.ToJson (new TurnStartEventToClient ()) };
@@ -115,7 +123,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
             GameState = GameState.WaitingForInput;
         }
         // 受け取った入力を処理+結果をクライアントに送信
-        // dotダメージや建造物の効果などはEndPhaseで発動する
+        // dotダメージや建造物の効果などはEndPhaseの最後で発動する
         private void EndPhase () {
             if (!PhotonNetwork.IsMasterClient) return;
             GameState = GameState.TurnEnd;
@@ -132,6 +140,25 @@ namespace StealthBoardStrategy.Server.GameLogic {
             if (!PhotonNetwork.IsMasterClient) return;
             BattleLogic.TurnProcessed++;
             PrePhase ();
+        }
+        private void SwitchGameState () {
+            if (!PhotonNetwork.IsMasterClient) return;
+            Debug.Log (GameState);
+            if (GameState == GameState.WaitingForInput) {
+                RemainingTime -= Time.fixedDeltaTime;
+                // 時間が過ぎるか入力が終わったらEndPhase
+                if (RemainingTime <= 0) {
+                    EndPhase ();
+                }
+                if(ActionAccepted1 == true && ActionAccepted2 == true){
+                    EndPhase();
+                }                
+            } else if (GameState == GameState.Matching) {
+                if (MasterPlayer != null && GuestPlayer != null) {
+                    PrePhase ();
+                }
+            }
+
         }
     }
 }
