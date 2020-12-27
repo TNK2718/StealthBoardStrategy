@@ -22,11 +22,15 @@ namespace StealthBoardStrategy.Frontend.Client {
         private GameObject CameraObj;
         private Tilemap BoardTileMap;
 
-        private Players Turn;
+        private Players MyPlayer;
+        private Players EnemyPlayer;
         private Board Board;
         private List<ClientUnit> UnitList1;
         private List<ClientUnit> UnitList2;
         private ClientGameState GameState;
+        // 選択した行動をサーバーへ送る
+        private ActionEvent ActionEvent;
+        private (Players player, int index) SelectedUnit;
 
         // ボードとキャラを同期
         [PunRPC]
@@ -72,6 +76,13 @@ namespace StealthBoardStrategy.Frontend.Client {
             Board = new Board ();
             UnitList1 = new List<ClientUnit> (MaxUnits);
             UnitList2 = new List<ClientUnit> (MaxUnits);
+            if (PhotonNetwork.IsMasterClient) {
+                MyPlayer = Players.Player1;
+                EnemyPlayer = Players.Player2;
+            } else {
+                MyPlayer = Players.Player2;
+                EnemyPlayer = Players.Player1;
+            }
         }
 
         private void Start () {
@@ -118,24 +129,51 @@ namespace StealthBoardStrategy.Frontend.Client {
                     Debug.Log (clickPosition);
                 }
 
+                // 選択したtilemapに対して処理
+                if (GameState == ClientGameState.WaitingForInput) {
+                    SelectUnit (clickPosition);
+                }
             }
-            // カメラを使う方法?
-            // Vector3 clickPos;
-            // Vector3 position;
-            // Vector3 direction;
-            // RaycastHit _hit;
-            // Vector3Int clickIntPos;
-            // if (Input.GetMouseButtonDown (0)) {
-            //     clickPos = Input.mousePosition;
-            //     position = CameraObj.transform.position;
-            //     clickPos.z = 10f;
-            //     direction = (Camera.main.ScreenToWorldPoint(clickPos) - CameraObj.transform.position).normalized;
-            //     Physics.Raycast(position, direction, out _hit, 100, 8, QueryTriggerInteraction.Collide);
-            //     Debug.DrawRay(position, direction);
-            //     // よくわからん
-            //     clickIntPos = BoardTileMap.WorldToCell(_hit.point + direction);
-            //     Debug.Log(clickIntPos);
-            // }
+        }
+        // クリックしたユニットにフォーカス
+        private void SelectUnit (Vector3Int _clickPos) {
+            List<int> units;
+            if (_clickPos.y > 0) {
+                // 敵陣をクリック
+                units = SearchUnit (EnemyPlayer, _clickPos.x, _clickPos.y);
+            } else if (_clickPos.y < 0) {
+                // 自陣をクリック
+                units = SearchUnit (MyPlayer, _clickPos.x, _clickPos.y);
+            }
+        }
+        // ある位置にいるユニットを列挙
+        private List<int> SearchUnit (Players player, int x, int y) {
+            List<int> result = new List<int> ();
+            if (player == Players.Player1) {
+                for (int i = 0; i < UnitList1.Count; i++) {
+                    if (UnitList1[i].PositionX == x && UnitList1[i].PositionY == y) {
+                        result.Add (i);
+                    }
+                }
+            } else if (player == Players.Player2) {
+                for (int i = 0; i < UnitList2.Count; i++) {
+                    if (UnitList2[i].PositionX == x && UnitList2[i].PositionY == y) {
+                        result.Add (i);
+                    }
+                }
+            } else {
+                Debug.LogWarning ("Error");
+            }
+            return result;
+        }
+        private List<ClientUnit> GetUnitList (Players player) {
+            if (player == Players.Player1) {
+                return UnitList1;
+            } else if (player == Players.Player2) {
+                return UnitList2;
+            } else {
+                return null;
+            }
         }
     }
 }

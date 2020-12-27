@@ -10,6 +10,6 @@ using UnityEngine.SceneManagement;
 
 namespace StealthBoardStrategy.Frontend.Client {
     public enum ClientGameState {
-        None, Matching, WaitingForInput, WaitingForResponse
+        None, Matching, WaitingForInput, TurnEnd
     }
 }
