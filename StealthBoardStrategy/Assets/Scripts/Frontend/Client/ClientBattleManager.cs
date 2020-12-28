@@ -141,6 +141,7 @@ namespace StealthBoardStrategy.Frontend.Client {
             if (_clickPos.y > 0) {
                 // 敵陣をクリック
                 units = SearchUnit (EnemyPlayer, _clickPos.x, _clickPos.y);
+                
             } else if (_clickPos.y < 0) {
                 // 自陣をクリック
                 units = SearchUnit (MyPlayer, _clickPos.x, _clickPos.y);
