@@ -83,6 +83,7 @@ namespace StealthBoardStrategy.Frontend.Client {
                 MyPlayer = Players.Player2;
                 EnemyPlayer = Players.Player1;
             }
+            SelectedUnit = (Players.None, -1);
         }
 
         private void Start () {
@@ -141,10 +142,27 @@ namespace StealthBoardStrategy.Frontend.Client {
             if (_clickPos.y > 0) {
                 // 敵陣をクリック
                 units = SearchUnit (EnemyPlayer, _clickPos.x, _clickPos.y);
-                
+                // 誰もいなかったら操作しない
+                if (units.Count == 0) return;
+                SelectedUnit.player = EnemyPlayer;
+                // 同じ位置に複数ユニットいる場合順番にフォーカス
+                if (SelectedUnit.player == EnemyPlayer && units.Find (x => x == SelectedUnit.index) >= 0 && units.Find (x => x == SelectedUnit.index) < units.Count - 1) {
+                    SelectedUnit.index = units.Find (x => x == SelectedUnit.index) + 1;
+                } else {
+                    SelectedUnit.index = units[0];
+                }
             } else if (_clickPos.y < 0) {
                 // 自陣をクリック
                 units = SearchUnit (MyPlayer, _clickPos.x, _clickPos.y);
+                // 誰もいなかったら操作しない
+                if (units.Count == 0) return;
+                SelectedUnit.player = MyPlayer;
+                // 同じ位置に複数ユニットいる場合順番にフォーカス
+                if (SelectedUnit.player == MyPlayer && units.Find (x => x == SelectedUnit.index) >= 0 && units.Find (x => x == SelectedUnit.index) < units.Count - 1) {
+                    SelectedUnit.index = units.Find (x => x == SelectedUnit.index) + 1;
+                } else {
+                    SelectedUnit.index = units[0];
+                }
             }
         }
         // ある位置にいるユニットを列挙
