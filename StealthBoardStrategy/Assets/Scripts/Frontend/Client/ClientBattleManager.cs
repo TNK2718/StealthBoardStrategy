@@ -128,11 +128,10 @@ namespace StealthBoardStrategy.Frontend.Client {
                 Vector3Int clickPosition = BoardTileMap.WorldToCell (screenToWorldPointPosition);
                 if (BoardTileMap.HasTile (clickPosition) == true) {
                     Debug.Log (clickPosition);
-                }
-
-                // 選択したtilemapに対して処理
-                if (GameState == ClientGameState.WaitingForInput) {
-                    SelectUnit (clickPosition);
+                    // 選択したtilemapに対して処理
+                    if (GameState == ClientGameState.WaitingForInput) {
+                        SelectUnit (clickPosition);
+                    }
                 }
             }
         }
