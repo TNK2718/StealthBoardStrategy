@@ -320,7 +320,7 @@ namespace StealthBoardStrategy.Server.DataBase {
                         SkillList = new List<Skill> ();
                         if (skillnum != 0) {
                             for (int i = 1; i <= skillnum; i++) {
-                                SkillList.Add (new Skill (int.Parse (cols[21 + i])));
+                                //TODO: SkillList.Add (new Skill (int.Parse (cols[21 + i])));
                             }
                         }
                         BuffList = new List<Buff> ();

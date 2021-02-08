@@ -31,6 +31,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         // 選択した行動をサーバーへ送る
         private ActionEvent ActionEvent;
         private (Players player, int index) SelectedUnit;
+        private int SelectedActionNo; //-1: 移動, 0-3 = スキルNo.
 
         // ボードとキャラを同期
         [PunRPC]
@@ -84,6 +85,7 @@ namespace StealthBoardStrategy.Frontend.Client {
                 EnemyPlayer = Players.Player1;
             }
             SelectedUnit = (Players.None, -1);
+            SelectedActionNo = -1;
         }
 
         private void Start () {
@@ -130,20 +132,31 @@ namespace StealthBoardStrategy.Frontend.Client {
                     Debug.Log (clickPosition);
                     // 選択したtilemapに対して処理
                     if (GameState == ClientGameState.WaitingForInput) {
-                        SelectUnit (clickPosition);
+                        if (SelectedUnit.index < 0) {
+                            SelectUnit (clickPosition);
+                        } else {
+
+                        }
                     }
                 }
             }
         }
         // クリックしたユニットにフォーカス
         private void SelectUnit (Vector3Int _clickPos) {
+            if (SelectedActionNo != -1) return;
+
             List<int> units;
             if (_clickPos.y > 0) {
                 // 敵陣をクリック
                 units = SearchUnit (EnemyPlayer, _clickPos.x, _clickPos.y);
-                // 誰もいなかったら操作しない
-                if (units.Count == 0) return;
+                // 誰もいなかったらフォーカスを解除
+                if (units.Count == 0) {
+                    SelectedUnit = (Players.None, -1);
+                    SelectedActionNo = -1;
+                    return;
+                }
                 SelectedUnit.player = EnemyPlayer;
+                SelectedActionNo = -1;
                 // 同じ位置に複数ユニットいる場合順番にフォーカス
                 if (SelectedUnit.player == EnemyPlayer && units.Find (x => x == SelectedUnit.index) >= 0 && units.Find (x => x == SelectedUnit.index) < units.Count - 1) {
                     SelectedUnit.index = units.Find (x => x == SelectedUnit.index) + 1;
@@ -153,9 +166,14 @@ namespace StealthBoardStrategy.Frontend.Client {
             } else if (_clickPos.y < 0) {
                 // 自陣をクリック
                 units = SearchUnit (MyPlayer, _clickPos.x, _clickPos.y);
-                // 誰もいなかったら操作しない
-                if (units.Count == 0) return;
+                // 誰もいなかったらフォーカスを解除
+                if (units.Count == 0) {
+                    SelectedUnit = (Players.None, -1);
+                    SelectedActionNo = -1;
+                    return;
+                }
                 SelectedUnit.player = MyPlayer;
+                SelectedActionNo = -1;
                 // 同じ位置に複数ユニットいる場合順番にフォーカス
                 if (SelectedUnit.player == MyPlayer && units.Find (x => x == SelectedUnit.index) >= 0 && units.Find (x => x == SelectedUnit.index) < units.Count - 1) {
                     SelectedUnit.index = units.Find (x => x == SelectedUnit.index) + 1;
@@ -164,6 +182,29 @@ namespace StealthBoardStrategy.Frontend.Client {
                 }
             }
         }
+        // キーボードorボタンで使用するスキルを指定
+        private void SelectAction () {
+            if (GameState != ClientGameState.WaitingForInput || SelectedUnit.player != MyPlayer) return;
+            if (Input.GetKeyDown (KeyCode.Q)) {
+                SelectedActionNo = 0;
+            } else if (Input.GetKeyDown (KeyCode.W)) {
+                SelectedActionNo = 1;
+            } else if (Input.GetKeyDown (KeyCode.E)) {
+                SelectedActionNo = 2;
+            } else if (Input.GetKeyDown (KeyCode.R)) {
+                SelectedActionNo = 3;
+            }
+        }
+        // 指定したスキルに応じてTargetを指定, ActionEventを更新
+        private void SelectTarget () {
+            if (SelectedUnit.player != MyPlayer) return;
+            if (SelectedActionNo == -1) {
+
+            } else {
+                // TODO: switch (GetUnitList (MyPlayer) [SelectedUnit.index].SkillList[SelectedActionNo])
+            }
+        }
+
         // ある位置にいるユニットを列挙
         private List<int> SearchUnit (Players player, int x, int y) {
             List<int> result = new List<int> ();
