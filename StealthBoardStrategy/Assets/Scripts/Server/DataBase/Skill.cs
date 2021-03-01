@@ -7,6 +7,7 @@ namespace StealthBoardStrategy.Server.DataBase {
         public int Id;
         public string Name;
         public SkillType SkillType;
+        public RangeType RangeType;
         public int[] args;
     }
 }

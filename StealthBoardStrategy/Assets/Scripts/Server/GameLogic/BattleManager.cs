@@ -23,6 +23,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
 
         public GameObject MasterPlayer;
         public GameObject GuestPlayer;
+        public SkillList SkillList;
 
         private void Start () {
             // ここからはMasterClientのみ
@@ -127,7 +128,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
         private void EndPhase () {
             if (!PhotonNetwork.IsMasterClient) return;
             GameState = GameState.TurnEnd;
-
+            // TODO: イベント生成, 処理
             // イベント送信&同期
             object[] args1 = new object[] { "TrunEndEventToClient", JsonUtility.ToJson (new TurnEndEventToClient ()) };
             object[] args2 = new object[] { "TrunEndEventToClient", JsonUtility.ToJson (new TurnEndEventToClient ()) };

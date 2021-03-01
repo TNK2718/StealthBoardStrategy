@@ -25,6 +25,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         private Players MyPlayer;
         private Players EnemyPlayer;
         private Board Board;
+        private SkillList SkillList;
         private List<ClientUnit> UnitList1;
         private List<ClientUnit> UnitList2;
         private ClientGameState GameState;
@@ -75,6 +76,7 @@ namespace StealthBoardStrategy.Frontend.Client {
 
         private void Awake () {
             Board = new Board ();
+            SkillList = new SkillList();
             UnitList1 = new List<ClientUnit> (MaxUnits);
             UnitList2 = new List<ClientUnit> (MaxUnits);
             if (PhotonNetwork.IsMasterClient) {
@@ -132,10 +134,10 @@ namespace StealthBoardStrategy.Frontend.Client {
                     Debug.Log (clickPosition);
                     // 選択したtilemapに対して処理
                     if (GameState == ClientGameState.WaitingForInput) {
-                        if (SelectedUnit.index < 0) {
+                        if (SelectedUnit.player == Players.None || SelectedUnit.index < 0) {
                             SelectUnit (clickPosition);
                         } else {
-
+                            SelectTarget(clickPosition);
                         }
                     }
                 }
@@ -143,6 +145,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         }
         // クリックしたユニットにフォーカス
         private void SelectUnit (Vector3Int _clickPos) {
+            // Actionが選択済みの場合はreturn
             if (SelectedActionNo != -1) return;
 
             List<int> units;
@@ -186,22 +189,31 @@ namespace StealthBoardStrategy.Frontend.Client {
         private void SelectAction () {
             if (GameState != ClientGameState.WaitingForInput || SelectedUnit.player != MyPlayer) return;
             if (Input.GetKeyDown (KeyCode.Q)) {
-                SelectedActionNo = 0;
+                if(SelectedActionNo != 0) SelectedActionNo = 0;
+                else SelectedActionNo = -1;
             } else if (Input.GetKeyDown (KeyCode.W)) {
-                SelectedActionNo = 1;
+                if(SelectedActionNo != 1) SelectedActionNo = 1;
+                else SelectedActionNo = -1;
             } else if (Input.GetKeyDown (KeyCode.E)) {
-                SelectedActionNo = 2;
+                if(SelectedActionNo != 2) SelectedActionNo = 2;
+                else SelectedActionNo = -1;
             } else if (Input.GetKeyDown (KeyCode.R)) {
-                SelectedActionNo = 3;
+                if(SelectedActionNo != 3) SelectedActionNo = 3;
+                else SelectedActionNo = -1;
             }
         }
         // 指定したスキルに応じてTargetを指定, ActionEventを更新
-        private void SelectTarget () {
+        private void SelectTarget (Vector3 _clickPos) {
             if (SelectedUnit.player != MyPlayer) return;
             if (SelectedActionNo == -1) {
-
+                return;
             } else {
-                // TODO: switch (GetUnitList (MyPlayer) [SelectedUnit.index].SkillList[SelectedActionNo])
+                switch (SkillList.Skills[GetUnitList (MyPlayer) [SelectedUnit.index].SkillList[SelectedActionNo]].RangeType){
+                    case RangeType.Round:
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
