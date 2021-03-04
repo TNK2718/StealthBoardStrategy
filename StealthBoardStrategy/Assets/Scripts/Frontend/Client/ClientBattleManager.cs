@@ -29,6 +29,8 @@ namespace StealthBoardStrategy.Frontend.Client {
         private List<ClientUnit> UnitList1;
         private List<ClientUnit> UnitList2;
         private ClientGameState GameState;
+        // 行動を保存
+        private UnitAction[] UnitActions;
         // 選択した行動をサーバーへ送る
         private ActionEvent ActionEvent;
         private (Players player, int index) SelectedUnit;
@@ -101,6 +103,11 @@ namespace StealthBoardStrategy.Frontend.Client {
 
         private void FixedUpdate () {
             RecieveTileInput ();
+        }
+
+        private void TurnStart(){
+            ActionEvent = new ActionEvent();
+            UnitActions = new UnitAction[GetUnitList(MyPlayer).Count];
         }
 
         // 初期化
@@ -203,15 +210,24 @@ namespace StealthBoardStrategy.Frontend.Client {
             }
         }
         // 指定したスキルに応じてTargetを指定, ActionEventを更新
-        private void SelectTarget (Vector3 _clickPos) {
+        private void SelectTarget (Vector3Int _clickPos) {
             if (SelectedUnit.player != MyPlayer) return;
             if (SelectedActionNo == -1) {
                 return;
             } else {
+                UnitAction unitAction = new UnitAction();
+                unitAction.Owner = MyPlayer;
+                unitAction.ActionNo = SelectedActionNo;
+                unitAction.Invoker = SelectedUnit.index;
                 switch (SkillList.Skills[GetUnitList (MyPlayer) [SelectedUnit.index].SkillList[SelectedActionNo]].RangeType){
                     case RangeType.Round:
+
                         break;
+                    // 敵陣の1点を指定
                     default:
+                        unitAction.TargetPositionX = _clickPos.x;
+                        unitAction.TargetPositionY = _clickPos.y;
+                        UnitActions[SelectedUnit.index] = unitAction;
                         break;
                 }
             }

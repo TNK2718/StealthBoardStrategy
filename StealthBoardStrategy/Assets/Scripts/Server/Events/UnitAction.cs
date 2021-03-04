@@ -6,6 +6,7 @@ namespace StealthBoardStrategy.Server.Events {
     public class UnitAction {
         public Players Owner;
         public int Invoker;
+        public int Speed;
         public int TargetPositionX;
         public int TargetPositionY;
         // 0: Move, 1: Skill1, 2: Skill2, ...
