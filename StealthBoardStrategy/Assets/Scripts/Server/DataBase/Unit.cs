@@ -30,6 +30,7 @@ namespace StealthBoardStrategy.Server.DataBase {
         public (int baseVal, int diff, bool visibility) MR;
         public (int baseVal, int diff, bool visibility) Speed;
         public (int baseVal, int diff, bool visibility) Calculation;
+        public (int baseVal, int diff, bool visibility) Agility;
         public Players Owner;
         public List<Skill> SkillList;
         public List<Buff> BuffList;
@@ -37,8 +38,6 @@ namespace StealthBoardStrategy.Server.DataBase {
         public UnitType UnitType;
         public int ActionPoint;
         protected bool IsActive;
-
-        public (int value, bool visibility) PrimaryDemon;
 
         public (int x, int y) GetPosition(){
             return (Position.x, Position.y);
@@ -114,6 +113,10 @@ namespace StealthBoardStrategy.Server.DataBase {
             if (Calculation.baseVal + Calculation.diff >= 0) return Calculation.baseVal + Calculation.diff;
             else return 0;
         }
+        public int GetAgility(){
+            if (Agility.baseVal + Agility.diff >= 0) return Agility.baseVal + Agility.diff;
+            else return 0;   
+        }
 
         // 0>=: 見えない, -calc <  < 0: 位置のみ, -calc <: 
         public void UpdateVisibility () {
@@ -139,6 +142,7 @@ namespace StealthBoardStrategy.Server.DataBase {
                 MR.visibility = false;
                 Speed.visibility = false;
                 Calculation.visibility = false;
+                Agility.visibility = false;
 
             } else if (GetStealthiness () < 0) {
                 if (GetStealthiness () < -GetCalculation ()) {
@@ -163,6 +167,7 @@ namespace StealthBoardStrategy.Server.DataBase {
                     MR.visibility = true;
                     Speed.visibility = true;
                     Calculation.visibility = true;
+                    Agility.visibility = true;
                 } else {
                     Id.visibility = true;
                     Name.visibility = true;
@@ -185,6 +190,7 @@ namespace StealthBoardStrategy.Server.DataBase {
                     MR.visibility = false;
                     Speed.visibility = false;
                     Calculation.visibility = false;
+                    Agility.visibility = false;
                 }
             }
         }
@@ -253,6 +259,7 @@ namespace StealthBoardStrategy.Server.DataBase {
             if (!(applyVisibility) || MR.visibility) instance.MR = GetMR ();
             if (!(applyVisibility) || Speed.visibility) instance.Speed = GetSpeed ();
             if (!(applyVisibility) || Calculation.visibility) instance.Calculation = GetCalculation ();
+            if (!(applyVisibility) || Agility.visibility) instance.Agility = GetAgility ();
             instance.ActionPoint = ActionPoint;
             instance.Owner = Owner;
             instance.SkillList = new int[SkillList.Count];
@@ -312,22 +319,23 @@ namespace StealthBoardStrategy.Server.DataBase {
                         MR = (int.Parse (cols[17]), 0, false);
                         Speed = (int.Parse (cols[18]), 0, false);
                         Calculation = (int.Parse (cols[19]), 0, false);
-                        UnitType = (UnitType) Enum.Parse (typeof (UnitType), cols[20]);
+                        Agility = (int.Parse(cols[20]), 0, false);
+                        UnitType = (UnitType) Enum.Parse (typeof (UnitType), cols[21]);
                         ActionPoint = 0;
                         IsActive = true;
                         Owner = owner;
-                        int skillnum = int.Parse (cols[21]);
+                        int skillnum = int.Parse (cols[22]);
                         SkillList = new List<Skill> ();
                         if (skillnum != 0) {
                             for (int i = 1; i <= skillnum; i++) {
-                                //TODO: SkillList.Add (new Skill (int.Parse (cols[21 + i])));
+                                //TODO: SkillList.Add (new Skill (int.Parse (cols[22 + i])));
                             }
                         }
                         BuffList = new List<Buff> ();
-                        int buffnum = int.Parse (cols[21 + skillnum + 1]);
+                        int buffnum = int.Parse (cols[22 + skillnum + 1]);
                         if (buffnum != 0) {
                             for (int i = 1; i <= skillnum; i++) {
-                                BuffList.Add (new Buff ((BuffType) Enum.Parse (typeof (BuffType), cols[21 + skillnum + 1 + i]), 0, Buff.INF));
+                                BuffList.Add (new Buff ((BuffType) Enum.Parse (typeof (BuffType), cols[22 + skillnum + 1 + i]), 0, Buff.INF));
                             }
                         }
                         // TODO: DemonList

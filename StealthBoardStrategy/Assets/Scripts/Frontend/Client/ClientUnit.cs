@@ -35,6 +35,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         public int MR;
         public int Speed;
         public int Calculation;
+        public int Agility;
         public int ActionPoint;
         public Players Owner;
         public int[] SkillList;

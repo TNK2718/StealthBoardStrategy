@@ -108,6 +108,14 @@ namespace StealthBoardStrategy.Frontend.Client {
         private void TurnStart(){
             ActionEvent = new ActionEvent();
             UnitActions = new UnitAction[GetUnitList(MyPlayer).Count];
+            GameState = ClientGameState.WaitingForInput;
+        }
+
+        // 入力を終了、ActionEventを送信
+        private void EndActionPhase(){
+            string[] args = {"ActionEvent", JsonUtility.ToJson(ActionEvent)};
+            Master.GetComponent<PhotonView>().RPC("SendEventToMaster", RpcTarget.MasterClient, args);
+            GameState = ClientGameState.TurnEnd;
         }
 
         // 初期化
@@ -226,8 +234,9 @@ namespace StealthBoardStrategy.Frontend.Client {
                     // 敵陣の1点を指定
                     default:
                         unitAction.TargetPositionX = _clickPos.x;
-                        unitAction.TargetPositionY = _clickPos.y;
+                        if(MyPlayer == Players.Player1) unitAction.TargetPositionY = _clickPos.y;
                         UnitActions[SelectedUnit.index] = unitAction;
+
                         break;
                 }
             }

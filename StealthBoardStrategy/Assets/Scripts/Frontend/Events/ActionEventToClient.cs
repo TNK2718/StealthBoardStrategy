@@ -1,13 +1,11 @@
 using StealthBoardStrategy.Frontend.Graphic;
+using System.Collections.Generic;
+
 
 namespace StealthBoardStrategy.Frontend.Events
 {
     public class ActionEventToClient: GameEventToClient
     {
-        int InvokerPositionX;
-        int InvokerPositionY;
-        int TargetPositionX;
-        int TargetPositionY;
-        EffectType EffectType;
+        public UnitActionToClient[] UnitActions;
     }
 }

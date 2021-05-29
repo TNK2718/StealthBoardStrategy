@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Photon.Pun;
 using StealthBoardStrategy.Frontend.Client;
 using StealthBoardStrategy.Frontend.Events;
+using StealthBoardStrategy.Frontend.Graphic;
 using StealthBoardStrategy.Server.DataBase;
 using StealthBoardStrategy.Server.Events;
 using StealthBoardStrategy.Server.GameLogic;
@@ -75,20 +76,73 @@ namespace StealthBoardStrategy.Server.GameLogic {
             }
             return null;
         }
-        // プレイヤーの行動を処理
-        private void ProcessActionEvents (ActionEvent actionEvent1, ActionEvent actionEvent2) {
-            // TODO: Spd順に各ユニットの行動をソート
+
+        // プレイヤーの行動を処理してクライアントへエフェクトの表示等をさせる命令を返す
+        public ActionEventToClient ProcessActionEvents (ActionEvent unitAction1, ActionEvent unitAction2) {
+            ActionEventToClient actionEventToClient = new ActionEventToClient ();
+            List<UnitActionToClient> unitActionsToClient = new List<UnitActionToClient> ();
+
+            // Agility順に各ユニットの行動をソート
+            List<UnitAction> concatUnitActions = new List<UnitAction> ();
+            if (unitAction1 != null) {
+                for (int i = 0; i < unitAction1.UnitActions.Length; i++) {
+                    concatUnitActions.Add (unitAction1.UnitActions[i]);
+                }
+            }
+            if (unitAction2 != null) {
+                for (int i = 0; i < unitAction2.UnitActions.Length; i++) {
+                    concatUnitActions.Add (unitAction2.UnitActions[i]);
+                }
+            }
+            concatUnitActions.Sort ((a, b) => b.Agility - a.Agility);
+
+            // 各行動を処理
+            for (int i = 0; i < concatUnitActions.Count; i++) {
+                // skillTypeで分岐
+                if (GetUnitList (concatUnitActions[i].Owner) [concatUnitActions[i].Invoker].SkillList[concatUnitActions[i].ActionNo].SkillType == SkillType.Move) {
+                    // Move
+                    unitActionsToClient.Add (Move (concatUnitActions[i].Owner, concatUnitActions[i].Invoker, (concatUnitActions[i].TargetPositionX, concatUnitActions[i].TargetPositionY)));
+                } else if (GetUnitList (concatUnitActions[i].Owner) [concatUnitActions[i].Invoker].SkillList[concatUnitActions[i].ActionNo].SkillType == SkillType.Attack) {
+                    // Attack todo
+                }
+            }
+
+            // ActionEventToClientを返す
+            for (int i = 0; i < unitActionsToClient.Count; i++) {
+                actionEventToClient.UnitActions[i] = unitActionsToClient[i];
+            }
+            return actionEventToClient;
         }
+
         //
         // スキルの実装
-        //
-        private void Move (Unit invoker, (int x, int y) position) {
-            // float squareddistanse;
-            // if (invoker.GetSpeed () * invoker.GetSpeed () >= squareddistanse) {
-            // } else {
-            //     // 不正な入力を通知
-            // }
+        // ActionEventToClientを返す
+
+        // 移動
+        private UnitActionToClient Move (Players owner, int invoker, (int x, int y) destination) {
+            Unit unit = GetUnitList (owner) [invoker];
+            float squareddistanse = destination.x * destination.x + destination.y * destination.y;
+            if (unit.GetSpeed () * unit.GetSpeed () < squareddistanse || destination.y == 0) {
+                // 不正な入力
+                Debug.Log ("Invalid input by unit" + invoker.ToString () + " on" + owner.ToString ());
+                return null;
+            }
+
+            UnitActionToClient unitAction = new UnitActionToClient ();
+            unitAction.InvokerPositionX = unit.GetPosition ().x;
+            unitAction.InvokerPositionY = unit.GetPosition ().y;
+
+            // 移動
+            unit.SetPosition (destination.x, destination.y);
+
+            unitAction.TargetPositionX = destination.x;
+            unitAction.TargetPositionY = destination.y;
+            unitAction.args = new List<int> ();
+            unitAction.args[0] = (int) owner;
+            unitAction.args[1] = invoker;
+            return unitAction;
         }
+
         private void Attack () {
 
         }
