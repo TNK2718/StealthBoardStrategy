@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
 using StealthBoardStrategy.Frontend.Events;
+using StealthBoardStrategy.Frontend.UI;
 using StealthBoardStrategy.Server.DataBase;
 using StealthBoardStrategy.Server.Events;
 using StealthBoardStrategy.Server.GameLogic;
@@ -66,19 +67,29 @@ namespace StealthBoardStrategy.Frontend.Client {
 
             } else if (msg == "TrunStartEventToClient") {
                 // エフェクト等の処理が終わるのを待ってサーバーに通知
-            } else if (msg == "TurnEndEventToClient") {
-                // エフェクトとか
+                TurnStart();
+
             } else {
-                Debug.LogAssertion ("Error");
+                Debug.LogAssertion ("EventToClient Type Error");
             }
             // 処理が終わったことを通知(全てReadyEventに統一)
-            object[] args = new object[] { "ReadyEvent", JsonUtility.ToJson (new ReadyEvent ()) };
+            object[] args = new object[] { "ReadyEvent", JsonUtility.ToJson (new ReadyEvent (MyPlayer)) };
             Master.GetComponent<PhotonView> ().RPC ("SendEventToMaster", RpcTarget.MasterClient, args);
+        }
+
+        // 
+        // 入力を終了、ActionEventを送信
+        public void EndActionPhase () {
+            ActionEvent.UnitActions = UnitActions;
+            ActionEvent.Sender = MyPlayer;
+            string[] args = { "ActionEvent", JsonUtility.ToJson (ActionEvent) };
+            Master.GetComponent<PhotonView> ().RPC ("SendEventToMaster", RpcTarget.MasterClient, args);
+            GameState = ClientGameState.TurnEnd;
         }
 
         private void Awake () {
             Board = new Board ();
-            SkillList = new SkillList();
+            SkillList = new SkillList ();
             UnitList1 = new List<ClientUnit> (MaxUnits);
             UnitList2 = new List<ClientUnit> (MaxUnits);
             if (PhotonNetwork.IsMasterClient) {
@@ -105,21 +116,24 @@ namespace StealthBoardStrategy.Frontend.Client {
             RecieveTileInput ();
         }
 
-        private void TurnStart(){
-            ActionEvent = new ActionEvent();
-            UnitActions = new UnitAction[GetUnitList(MyPlayer).Count];
-            GameState = ClientGameState.WaitingForInput;
-        }
+        private void TurnStart () {
+            ActionEvent = new ActionEvent ();
+            ActionEvent.Sender = MyPlayer;
+            UnitActions = new UnitAction[GetUnitList (MyPlayer).Count];
+            Debug.Log(UnitActions.Length);
+            for (int i = 0; i < UnitActions.Length; i++) {
+                UnitActions[i] = new UnitAction ();
+                UnitActions[i].ActionNo = -1;
+                UnitActions[i].Owner = MyPlayer;
+                UnitActions[i].Invoker = i;
 
-        // 入力を終了、ActionEventを送信
-        private void EndActionPhase(){
-            string[] args = {"ActionEvent", JsonUtility.ToJson(ActionEvent)};
-            Master.GetComponent<PhotonView>().RPC("SendEventToMaster", RpcTarget.MasterClient, args);
-            GameState = ClientGameState.TurnEnd;
+            }
+            GameState = ClientGameState.WaitingForInput;
         }
 
         // 初期化
         private void RegisterPlayerToBattleManager () {
+            // MasterのBattleManagerに登録
             Master = GameObject.Find ("Master");
             BattleManager battleManager = Master.GetComponent<BattleManager> ();
             if (this.photonView.IsMine) {
@@ -129,6 +143,12 @@ namespace StealthBoardStrategy.Frontend.Client {
             } else {
                 if (PhotonNetwork.IsMasterClient) battleManager.GuestPlayer = this.gameObject;
                 else battleManager.MasterPlayer = this.gameObject;
+            }
+            // クライアントのUIManagerに登録
+            if (this.photonView.IsMine) {
+                GameObject uiManagerObj = GameObject.Find ("UIManager");
+                UIManager uiManager = uiManagerObj.GetComponent<UIManager> ();
+                uiManager.clientBattleManager = this.gameObject.GetComponent<ClientBattleManager> ();
             }
             DontDestroyOnLoad (this.gameObject);
         }
@@ -152,12 +172,31 @@ namespace StealthBoardStrategy.Frontend.Client {
                         if (SelectedUnit.player == Players.None || SelectedUnit.index < 0) {
                             SelectUnit (clickPosition);
                         } else {
-                            SelectTarget(clickPosition);
+                            SelectTarget (clickPosition);
+                        }
+                    }
+                }
+            } else if (Input.GetMouseButton (1)) {
+                // Vector3でマウス位置座標を取得する
+                var position = Input.mousePosition;
+                // Z軸修正
+                position.z = 10f;
+                // マウス位置座標をスクリーン座標からワールド座標に変換する
+                var screenToWorldPointPosition = Camera.main.ScreenToWorldPoint (position);
+                //tilemap座標を得る
+                Vector3Int clickPosition = BoardTileMap.WorldToCell (screenToWorldPointPosition);
+                if (BoardTileMap.HasTile (clickPosition) == true) {
+                    Debug.Log (clickPosition);
+                    // 選択したtilemapに対して処理
+                    if (GameState == ClientGameState.WaitingForInput) {
+                        if (SelectedUnit.player == Players.None || SelectedUnit.index < 0) { } else {
+                            SelectDestination (clickPosition);
                         }
                     }
                 }
             }
         }
+
         // クリックしたユニットにフォーカス
         private void SelectUnit (Vector3Int _clickPos) {
             // Actionが選択済みの場合はreturn
@@ -204,42 +243,71 @@ namespace StealthBoardStrategy.Frontend.Client {
         private void SelectAction () {
             if (GameState != ClientGameState.WaitingForInput || SelectedUnit.player != MyPlayer) return;
             if (Input.GetKeyDown (KeyCode.Q)) {
-                if(SelectedActionNo != 0) SelectedActionNo = 0;
+                if (SelectedActionNo != 1) SelectedActionNo = 1;
                 else SelectedActionNo = -1;
             } else if (Input.GetKeyDown (KeyCode.W)) {
-                if(SelectedActionNo != 1) SelectedActionNo = 1;
+                if (SelectedActionNo != 2) SelectedActionNo = 2;
                 else SelectedActionNo = -1;
             } else if (Input.GetKeyDown (KeyCode.E)) {
-                if(SelectedActionNo != 2) SelectedActionNo = 2;
+                if (SelectedActionNo != 3) SelectedActionNo = 3;
                 else SelectedActionNo = -1;
             } else if (Input.GetKeyDown (KeyCode.R)) {
-                if(SelectedActionNo != 3) SelectedActionNo = 3;
+                if (SelectedActionNo != 4) SelectedActionNo = 4;
                 else SelectedActionNo = -1;
             }
         }
+
         // 指定したスキルに応じてTargetを指定, ActionEventを更新
         private void SelectTarget (Vector3Int _clickPos) {
             if (SelectedUnit.player != MyPlayer) return;
             if (SelectedActionNo == -1) {
                 return;
             } else {
-                UnitAction unitAction = new UnitAction();
+                UnitAction unitAction = new UnitAction ();
                 unitAction.Owner = MyPlayer;
                 unitAction.ActionNo = SelectedActionNo;
                 unitAction.Invoker = SelectedUnit.index;
-                switch (SkillList.Skills[GetUnitList (MyPlayer) [SelectedUnit.index].SkillList[SelectedActionNo]].RangeType){
+                switch (SkillList.Skills[GetUnitList (MyPlayer) [SelectedUnit.index].SkillList[SelectedActionNo]].RangeType) {
                     case RangeType.Round:
 
                         break;
-                    // 敵陣の1点を指定
                     default:
+                        // 1点を指定
                         unitAction.TargetPositionX = _clickPos.x;
-                        if(MyPlayer == Players.Player1) unitAction.TargetPositionY = _clickPos.y;
+
+                        if (MyPlayer == Players.Player1) unitAction.TargetPositionY = _clickPos.y;
+                        else unitAction.TargetPositionY = -_clickPos.y;
                         UnitActions[SelectedUnit.index] = unitAction;
 
                         break;
                 }
             }
+        }
+
+        // 移動先を指定
+        private void SelectDestination (Vector3Int _clickPos) {
+            if (SelectedUnit.player != MyPlayer) return;
+            if (SelectedActionNo != -1) {
+                return;
+            } else {
+                UnitAction unitAction = new UnitAction ();
+                unitAction.Owner = MyPlayer;
+                unitAction.ActionNo = SelectedActionNo;
+                unitAction.Invoker = SelectedUnit.index;
+                switch (SkillList.Skills[GetUnitList (MyPlayer) [SelectedUnit.index].SkillList[SelectedActionNo]].RangeType) {
+                    case RangeType.Round:
+
+                        break;
+                        // 敵陣の1点を指定
+                    default:
+                        unitAction.TargetPositionX = _clickPos.x;
+                        if (MyPlayer == Players.Player1) unitAction.TargetPositionY = _clickPos.y;
+                        UnitActions[SelectedUnit.index] = unitAction;
+
+                        break;
+                }
+            }
+
         }
 
         // ある位置にいるユニットを列挙

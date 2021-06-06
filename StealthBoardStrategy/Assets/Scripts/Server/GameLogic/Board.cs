@@ -8,7 +8,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
     public class Board {
         // Player2のボード:右手系
         // Player1のボード:左手系
-        public const int BOARDSIZE = 5;
+        public const int BOARDSIZE = 3;
         public GroundTile[] GroundTiles1;
         public GroundTile[] GroundTiles2;
 

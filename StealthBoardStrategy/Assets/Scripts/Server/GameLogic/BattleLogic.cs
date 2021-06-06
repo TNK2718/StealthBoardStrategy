@@ -99,7 +99,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
             // 各行動を処理
             for (int i = 0; i < concatUnitActions.Count; i++) {
                 // skillTypeで分岐
-                if (GetUnitList (concatUnitActions[i].Owner) [concatUnitActions[i].Invoker].SkillList[concatUnitActions[i].ActionNo].SkillType == SkillType.Move) {
+                if (concatUnitActions[i].ActionNo == 0) {
                     // Move
                     unitActionsToClient.Add (Move (concatUnitActions[i].Owner, concatUnitActions[i].Invoker, (concatUnitActions[i].TargetPositionX, concatUnitActions[i].TargetPositionY)));
                 } else if (GetUnitList (concatUnitActions[i].Owner) [concatUnitActions[i].Invoker].SkillList[concatUnitActions[i].ActionNo].SkillType == SkillType.Attack) {
