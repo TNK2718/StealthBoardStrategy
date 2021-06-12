@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using StealthBoardStrategy.Frontend.Graphic;
 using UnityEngine;
+using System;
+
 
 namespace StealthBoardStrategy.Frontend.Events {
+    [Serializable]
     public class UnitActionToClient {
         public int InvokerPositionX;
         public int InvokerPositionY;

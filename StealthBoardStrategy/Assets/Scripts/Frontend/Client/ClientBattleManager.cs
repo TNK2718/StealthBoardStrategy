@@ -119,7 +119,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         private void TurnStart () {
             ActionEvent = new ActionEvent ();
             ActionEvent.Sender = MyPlayer;
-            UnitActions = new UnitAction[GetUnitList (MyPlayer).Count];
+            UnitActions = new UnitAction[MaxUnits];
             Debug.Log(UnitActions.Length);
             for (int i = 0; i < UnitActions.Length; i++) {
                 UnitActions[i] = new UnitAction ();

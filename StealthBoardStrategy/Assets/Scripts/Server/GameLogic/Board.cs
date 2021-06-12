@@ -5,6 +5,7 @@ using StealthBoardStrategy.Server.Events;
 using StealthBoardStrategy.Server.GameLogic;
 
 namespace StealthBoardStrategy.Server.GameLogic {
+    [Serializable]
     public class Board {
         // Player2のボード:右手系
         // Player1のボード:左手系

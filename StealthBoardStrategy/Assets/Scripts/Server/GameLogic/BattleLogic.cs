@@ -108,8 +108,11 @@ namespace StealthBoardStrategy.Server.GameLogic {
             }
 
             // ActionEventToClientを返す
-            for (int i = 0; i < unitActionsToClient.Count; i++) {
-                actionEventToClient.UnitActions[i] = unitActionsToClient[i];
+            if (unitActionsToClient.Count > 0) {
+                actionEventToClient.UnitActions = new UnitActionToClient[unitActionsToClient.Count];
+                for (int i = 0; i < unitActionsToClient.Count; i++) {
+                    actionEventToClient.UnitActions[i] = unitActionsToClient[i];
+                }
             }
             return actionEventToClient;
         }
