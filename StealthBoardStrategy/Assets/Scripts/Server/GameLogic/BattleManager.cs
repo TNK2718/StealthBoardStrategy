@@ -116,6 +116,8 @@ namespace StealthBoardStrategy.Server.GameLogic {
         // ターン開始
         private void TurnStart () {
             if (!PhotonNetwork.IsMasterClient) return;
+            Debug.Log("TurnStart");
+
             RemainingTime = SELECTING_TIME;
 
             // 入力を受付
@@ -148,6 +150,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
         // ターン終了
         private void TurnEnd () {
             if (!PhotonNetwork.IsMasterClient) return;
+            Debug.Log("TurnEnd");
 
             BattleLogic.TurnProcessed++;
             Ready1 = false;

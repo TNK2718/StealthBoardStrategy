@@ -22,8 +22,8 @@ namespace StealthBoardStrategy.Server.GameLogic {
             TurnProcessed = 0;
             Board = new Board ();
             // プレイヤーユニットを生成
-            UnitList1 = new List<Unit> { new Unit (0, Players.Player1, 0, 0, Players.Player1) };
-            UnitList2 = new List<Unit> { new Unit (0, Players.Player2, 0, 0, Players.Player2) };
+            UnitList1 = new List<Unit> { new Unit (0, Players.Player1, 0, -1, Players.Player1), new Unit (0, Players.Player1, 0, -1, Players.Player1), new Unit (0, Players.Player1, 0, -1, Players.Player1) };
+            UnitList2 = new List<Unit> { new Unit (0, Players.Player2, 0, 1, Players.Player2), new Unit (0, Players.Player2, 0, 1, Players.Player2), new Unit (0, Players.Player2, 0, 1, Players.Player2) };
         }
 
         public object[][] SerializeBoard () {
@@ -79,6 +79,9 @@ namespace StealthBoardStrategy.Server.GameLogic {
 
         // プレイヤーの行動を処理してクライアントへエフェクトの表示等をさせる命令を返す
         public ActionEventToClient ProcessActionEvents (ActionEvent unitAction1, ActionEvent unitAction2) {
+            if (unitAction1.UnitActions.Length == 0 && unitAction2.UnitActions.Length == 0) {
+                return new ActionEventToClient ();
+            }
             ActionEventToClient actionEventToClient = new ActionEventToClient ();
             List<UnitActionToClient> unitActionsToClient = new List<UnitActionToClient> ();
 
@@ -102,18 +105,26 @@ namespace StealthBoardStrategy.Server.GameLogic {
                 if (concatUnitActions[i].ActionNo == 0) {
                     // Move
                     unitActionsToClient.Add (Move (concatUnitActions[i].Owner, concatUnitActions[i].Invoker, (concatUnitActions[i].TargetPositionX, concatUnitActions[i].TargetPositionY)));
+                } else if(concatUnitActions[i].ActionNo <= -1) {
+                    // 通常攻撃
+                    Debug.Log("normal attack");
                 } else if (GetUnitList (concatUnitActions[i].Owner) [concatUnitActions[i].Invoker].SkillList[concatUnitActions[i].ActionNo].SkillType == SkillType.Attack) {
                     // Attack todo
+
+                } else {
+                    // 空のアクション
+                    Debug.Log ("None");
+                    unitActionsToClient.Add (None ());
                 }
             }
 
             // ActionEventToClientを返す
-            if (unitActionsToClient.Count > 0) {
-                actionEventToClient.UnitActions = new UnitActionToClient[unitActionsToClient.Count];
-                for (int i = 0; i < unitActionsToClient.Count; i++) {
-                    actionEventToClient.UnitActions[i] = unitActionsToClient[i];
-                }
+            Debug.Log (unitActionsToClient.Count);
+            actionEventToClient.UnitActions = new UnitActionToClient[unitActionsToClient.Count];
+            for (int i = 0; i < unitActionsToClient.Count; i++) {
+                actionEventToClient.UnitActions[i] = unitActionsToClient[i];
             }
+
             return actionEventToClient;
         }
 
@@ -140,14 +151,20 @@ namespace StealthBoardStrategy.Server.GameLogic {
 
             unitAction.TargetPositionX = destination.x;
             unitAction.TargetPositionY = destination.y;
-            unitAction.args = new List<int> ();
             unitAction.args[0] = (int) owner;
             unitAction.args[1] = invoker;
+            unitAction.EffectType = EffectType.Move;
             return unitAction;
         }
 
         private void Attack () {
 
+        }
+
+        private UnitActionToClient None () {
+            UnitActionToClient unitAction = new UnitActionToClient ();
+            unitAction.EffectType = EffectType.None;
+            return unitAction;
         }
         private List<Unit> GetUnitList (Players player) {
             if (player == Players.Player1) {

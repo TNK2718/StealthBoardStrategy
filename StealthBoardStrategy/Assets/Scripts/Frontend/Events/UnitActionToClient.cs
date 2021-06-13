@@ -12,7 +12,7 @@ namespace StealthBoardStrategy.Frontend.Events {
         public int InvokerPositionY;
         public int TargetPositionX;
         public int TargetPositionY;
-        public List<int> args;
+        public int[] args;
         public EffectType EffectType;
 
     }

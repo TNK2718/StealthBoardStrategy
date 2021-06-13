@@ -35,7 +35,7 @@ namespace StealthBoardStrategy.Frontend.Client {
         // 選択した行動をサーバーへ送る
         private ActionEvent ActionEvent;
         private (Players player, int index) SelectedUnit;
-        private int SelectedActionNo; //-1: 移動, 0-3 = スキルNo.
+        private int SelectedActionNo; //0: 移動, 1-4 = スキルNo.
 
         // ボードとキャラを同期
         [PunRPC]
@@ -120,7 +120,6 @@ namespace StealthBoardStrategy.Frontend.Client {
             ActionEvent = new ActionEvent ();
             ActionEvent.Sender = MyPlayer;
             UnitActions = new UnitAction[MaxUnits];
-            Debug.Log(UnitActions.Length);
             for (int i = 0; i < UnitActions.Length; i++) {
                 UnitActions[i] = new UnitAction ();
                 UnitActions[i].ActionNo = -1;
