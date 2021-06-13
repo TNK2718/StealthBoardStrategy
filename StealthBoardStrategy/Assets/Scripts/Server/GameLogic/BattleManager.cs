@@ -161,7 +161,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
 
         private void SwitchGameState () {
             if (!PhotonNetwork.IsMasterClient) return;
-            Debug.Log(GameState);
+            //Debug.Log(GameState);
 
             if (GameState == GameState.WaitingForInput) {
                 RemainingTime -= Time.fixedDeltaTime;
@@ -182,6 +182,7 @@ namespace StealthBoardStrategy.Server.GameLogic {
                 }
             } else if (GameState == GameState.TurnEnd) {
                 if (Ready1 && Ready2) {
+                    PrePhase();
                 }
             }
         }
