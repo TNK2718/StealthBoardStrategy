@@ -236,6 +236,9 @@ namespace StealthBoardStrategy.Server.DataBase {
         // シリアライズ可能なClientUnit型を生成して返す
         public ClientUnit ConvertToClientUnit (bool applyVisibility) {
             ClientUnit instance = new ClientUnit ();
+            // 仮置き
+            instance.Visibility = Position.visibility;
+            
             if (!(applyVisibility) || Id.visibility) instance.Id = Id.value;
             if (!(applyVisibility) || Name.visibility) instance.Name = Name.value;
             instance.LocatedSide = LocatedSide;

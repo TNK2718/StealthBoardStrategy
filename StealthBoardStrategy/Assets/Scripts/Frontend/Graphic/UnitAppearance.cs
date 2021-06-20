@@ -16,13 +16,13 @@ namespace StealthBoardStrategy.Frontend.Graphic
 {
     public class UnitAppearance : MonoBehaviour
     {
-        public int Id;
-        public (int x, int y) Position;
-        public (int current, int max) Hp;
+        public int? Id;
+        public (int? x, int? y) Position;
+        public (int? current, int? max) Hp;
         SpriteRenderer spriteRenderer;
 
 
-        public void Initialize(int _id, (int x, int y) _position, (int current, int max) _hp){
+        public void Initialize(int? _id, (int? x, int? y) _position, (int? current, int? max) _hp){
             Id = _id;
             Position = _position;
             Hp = _hp;

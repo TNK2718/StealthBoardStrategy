@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
 using StealthBoardStrategy.Frontend.Events;
+using StealthBoardStrategy.Frontend.Graphic;
 using StealthBoardStrategy.Frontend.UI;
 using StealthBoardStrategy.Server.DataBase;
 using StealthBoardStrategy.Server.Events;
@@ -26,8 +27,8 @@ namespace StealthBoardStrategy.Frontend.Client {
 
         // 
         private GameObject unitObjPrefab;
-        private GameObject[] unitObjects1 = new GameObject[MaxUnits];
-        private GameObject[] unitObjects2 = new GameObject[MaxUnits];
+        private UnitAppearance[] unitApps1 = new UnitAppearance[MaxUnits];
+        private UnitAppearance[] unitApps2 = new UnitAppearance[MaxUnits];
 
         //
         private Players MyPlayer;
@@ -59,10 +60,23 @@ namespace StealthBoardStrategy.Frontend.Client {
                     UnitList2.Add (JsonUtility.FromJson<ClientUnit> (unitListJson2[i]));
                 }
 
+                // TODO
                 // 見た目を反映
                 for (int i = 0; i < MaxUnits; i++) {
-                    if (unitObjects1[i] == null) {
-                        unitObjects1[i] = GameObject.Instantiate (unitObjPrefab);
+                    // initialize
+                    if (GetUnitAppearances (MyPlayer) [i] == null && GetUnitList (MyPlayer) [i].Visibility) {
+                        GetUnitAppearances (MyPlayer) [i] = GameObject.Instantiate (unitObjPrefab).GetComponent<UnitAppearance> ();
+                        GetUnitAppearances (MyPlayer) [i].Initialize (
+                            GetUnitList (MyPlayer) [i].Id, //
+                            (GetUnitList (MyPlayer) [i].PositionX, GetUnitList (MyPlayer) [i].PositionY), //
+                            (GetUnitList (MyPlayer) [i].Hp, GetUnitList (MyPlayer) [i].MaxHp));
+                    }
+                    if (GetUnitAppearances (EnemyPlayer) [i] == null && GetUnitList (EnemyPlayer) [i].Visibility) {
+                        GetUnitAppearances (EnemyPlayer) [i] = GameObject.Instantiate (unitObjPrefab).GetComponent<UnitAppearance> ();
+                        GetUnitAppearances (EnemyPlayer) [i].Initialize (
+                            GetUnitList (MyPlayer) [i].Id, //
+                            (GetUnitList (MyPlayer) [i].PositionX, GetUnitList (MyPlayer) [i].PositionY), //
+                            (GetUnitList (MyPlayer) [i].Hp, GetUnitList (MyPlayer) [i].MaxHp));
                     }
                 }
             } catch {
@@ -354,11 +368,11 @@ namespace StealthBoardStrategy.Frontend.Client {
             }
         }
 
-        private GameObject[] GetUnitObjects (Players player) {
+        private UnitAppearance[] GetUnitAppearances (Players player) {
             if (player == Players.Player1) {
-                return unitObjects1;
+                return unitApps1;
             } else if (player == Players.Player2) {
-                return unitObjects2;
+                return unitApps2;
             } else {
                 return null;
             }
