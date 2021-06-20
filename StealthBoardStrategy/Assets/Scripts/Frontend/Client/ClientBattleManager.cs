@@ -19,10 +19,17 @@ namespace StealthBoardStrategy.Frontend.Client {
         public static GameObject LocalPlayerInstance;
         public const int MaxUnits = 3;
 
+        // 
         private GameObject Master;
         private GameObject CameraObj;
         private Tilemap BoardTileMap;
 
+        // 
+        private GameObject unitObjPrefab;
+        private GameObject[] unitObjects1 = new GameObject[MaxUnits];
+        private GameObject[] unitObjects2 = new GameObject[MaxUnits];
+
+        //
         private Players MyPlayer;
         private Players EnemyPlayer;
         private Board Board;
@@ -51,6 +58,13 @@ namespace StealthBoardStrategy.Frontend.Client {
                 for (int i = 0; i < unitListJson2.Length; i++) {
                     UnitList2.Add (JsonUtility.FromJson<ClientUnit> (unitListJson2[i]));
                 }
+
+                // 見た目を反映
+                for (int i = 0; i < MaxUnits; i++) {
+                    if (unitObjects1[i] == null) {
+                        unitObjects1[i] = GameObject.Instantiate (unitObjPrefab);
+                    }
+                }
             } catch {
                 Debug.Log ("SyncBoardError");
             }
@@ -67,7 +81,7 @@ namespace StealthBoardStrategy.Frontend.Client {
 
             } else if (msg == "TrunStartEventToClient") {
                 // エフェクト等の処理が終わるのを待ってサーバーに通知
-                TurnStart();
+                TurnStart ();
 
             } else {
                 Debug.LogAssertion ("EventToClient Type Error");
@@ -110,6 +124,7 @@ namespace StealthBoardStrategy.Frontend.Client {
             RegisterPlayerToBattleManager ();
             // Tilemapを取得
             BoardTileMap = GameObject.Find ("BoardTilemap").GetComponent<Tilemap> ();
+            unitObjPrefab = (GameObject) Resources.Load ("Unit");
         }
 
         private void FixedUpdate () {
@@ -334,6 +349,16 @@ namespace StealthBoardStrategy.Frontend.Client {
                 return UnitList1;
             } else if (player == Players.Player2) {
                 return UnitList2;
+            } else {
+                return null;
+            }
+        }
+
+        private GameObject[] GetUnitObjects (Players player) {
+            if (player == Players.Player1) {
+                return unitObjects1;
+            } else if (player == Players.Player2) {
+                return unitObjects2;
             } else {
                 return null;
             }
